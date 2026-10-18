@@ -10,6 +10,12 @@
       {{ 'auth.loginTitle' | translate }}
     </h1>
 
+    @if (passwordChanged()) {
+      <app-ui-alert severity="success" class="mb-4 block">
+        {{ 'auth.passwordChanged' | translate }}
+      </app-ui-alert>
+    }
+
     @if (error()) {
       <app-ui-alert severity="error" class="mb-4 block">{{ 'auth.failed' | translate }}</app-ui-alert>
     }

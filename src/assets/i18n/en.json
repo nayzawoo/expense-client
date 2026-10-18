@@ -7,6 +7,7 @@
     "dashboard": "Dashboard",
     "expenses": "Expenses",
     "categories": "Categories",
+    "accounts": "Accounts",
     "logout": "Sign out",
     "language": "Language"
   },
@@ -22,7 +23,11 @@
     "newPassword": "New password",
     "confirmPassword": "Confirm password",
     "savePassword": "Save password",
-    "placeholderNote": "Password change UI is wired for the session API; finish flow in a follow-up slice.",
+    "passwordTooShort": "New password must be at least 8 characters.",
+    "passwordMismatch": "New password and confirmation do not match.",
+    "currentPasswordWrong": "Current password is incorrect.",
+    "changePasswordFailed": "Could not change password. Try again.",
+    "passwordChanged": "Password updated. Sign in with your new password.",
     "showPassword": "Show",
     "hidePassword": "Hide"
   },
