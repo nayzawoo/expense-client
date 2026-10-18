@@ -83,6 +83,25 @@ export class AuthService {
     );
   }
 
+  /** Keep shell / guards in sync after a profile display-name update. */
+  applyUser(user: CurrentUser): void {
+    this.userSignal.set(user);
+  }
+
+  /**
+   * Clear local auth after the server revoked the session (password or email change).
+   * Refreshes CSRF for the next anonymous/login flow.
+   */
+  clearLocalSession(): Observable<void> {
+    this.userSignal.set(null);
+    this.householdSignal.set(null);
+    this.csrfTokenSignal.set(null);
+    return this.refreshCsrf().pipe(
+      map(() => void 0),
+      catchError(() => of(void 0)),
+    );
+  }
+
   /**
    * Rotate password. Server returns 204 and invalidates the session.
    * Clears local auth state; caller should send the user to login.
@@ -94,14 +113,7 @@ export class AuthService {
         { currentPassword, newPassword },
         { withCredentials: true, headers: this.csrfHeaders() },
       )
-      .pipe(
-        tap(() => {
-          this.userSignal.set(null);
-          this.householdSignal.set(null);
-          this.csrfTokenSignal.set(null);
-        }),
-        switchMap(() => this.refreshCsrf().pipe(map(() => void 0), catchError(() => of(void 0)))),
-      );
+      .pipe(switchMap(() => this.clearLocalSession()));
   }
 
   logout(): Observable<void> {
