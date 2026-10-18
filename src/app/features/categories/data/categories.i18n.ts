@@ -1,0 +1,93 @@
+import { InjectionToken, inject } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
+
+const EN = {
+  categories: {
+    title: 'Categories',
+    subtitle: 'Manage expense categories',
+    add: 'Add category',
+    empty: 'No categories yet.',
+    loadError: 'Could not load categories',
+    name: 'Name',
+    color: 'Color',
+    icon: 'Icon key',
+    sort: 'Sort order',
+    status: 'Status',
+    actions: 'Actions',
+    createTitle: 'Create category',
+    createSubtitle: 'Add a new expense category',
+    editTitle: 'Edit category',
+    editSubtitle: 'Update expense category details',
+    save: 'Save',
+    create: 'Create',
+    saving: 'Saving…',
+    archive: 'Archive',
+    restore: 'Restore',
+    confirmArchive:
+      'Archive this category? It stays in history but is hidden from new expenses.',
+    back: 'Back',
+    filterAll: 'All',
+    filterActive: 'Active',
+    filterArchived: 'Archived',
+    readOnly: 'Members can view categories. Only admins can change them.',
+    colorHint: 'Used on charts and lists',
+    iconHint: 'API icon key (for example food, transport)',
+    nameRequired: 'Name is required',
+    colorRequired: 'Color is required',
+    saveError: 'Could not save category',
+    statusError: 'Could not update category status',
+  },
+};
+
+const MY = {
+  categories: {
+    title: 'အမျိုးအစားများ',
+    subtitle: 'အသုံးစရိတ် အမျိုးအစားများကို စီမံရန်',
+    add: 'အမျိုးအစား ထည့်ရန်',
+    empty: 'အမျိုးအစား မရှိသေးပါ။',
+    loadError: 'အမျိုးအစားများ ဖတ်မရပါ',
+    name: 'အမည်',
+    color: 'အရောင်',
+    icon: 'အိုင်ကွန် ကီး',
+    sort: 'အစဉ်',
+    status: 'အခြေအနေ',
+    actions: 'လုပ်ဆောင်ချက်',
+    createTitle: 'အမျိုးအစား အသစ်',
+    createSubtitle: 'အသုံးစရိတ် အမျိုးအစား အသစ် ထည့်ရန်',
+    editTitle: 'အမျိုးအစား ပြင်ရန်',
+    editSubtitle: 'အမျိုးအစား အချက်အလက် ပြင်ရန်',
+    save: 'သိမ်းရန်',
+    create: 'ဖန်တီးရန်',
+    saving: 'သိမ်းနေသည်…',
+    archive: 'စုသိမ်းရန်',
+    restore: 'ပြန်ဖွင့်ရန်',
+    confirmArchive:
+      'ဤအမျိုးအစားကို စုသိမ်းမလား။ မှတ်တမ်းတွင် ကျန်မည်ဖြစ်ပြီး အသစ်တွင် မပေါ်ပါ။',
+    back: 'နောက်သို့',
+    filterAll: 'အားလုံး',
+    filterActive: 'အသုံးပြုနေ',
+    filterArchived: 'စုသိမ်းပြီး',
+    readOnly: 'အဖွဲ့ဝင်များ ကြည့်နိုင်သည်။ ပြင်ဆင်ရန် admin လိုအပ်သည်။',
+    colorHint: 'ဇယားနှင့် စာရင်းတွင် သုံးသည်',
+    iconHint: 'API အိုင်ကွန် ကီး (ဥပမာ food, transport)',
+    nameRequired: 'အမည် လိုအပ်သည်',
+    colorRequired: 'အရောင် လိုအပ်သည်',
+    saveError: 'အမျိုးအစား သိမ်းမရပါ',
+    statusError: 'အခြေအနေ ပြင်မရပါ',
+  },
+};
+
+export const CATEGORIES_I18N = new InjectionToken<boolean>('CATEGORIES_I18N');
+
+/** Merge feature strings into ngx-translate without editing scaffold asset files. */
+export function provideCategoriesI18n() {
+  return {
+    provide: CATEGORIES_I18N,
+    useFactory: () => {
+      const translate = inject(TranslateService);
+      translate.setTranslation('en', EN, true);
+      translate.setTranslation('my', MY, true);
+      return true;
+    },
+  };
+}
