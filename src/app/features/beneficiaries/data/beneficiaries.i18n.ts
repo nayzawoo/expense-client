@@ -1,0 +1,93 @@
+import { InjectionToken, inject } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
+
+const EN = {
+  beneficiaries: {
+    title: 'Beneficiaries',
+    subtitle: 'People and groups expenses are for',
+    add: 'Add beneficiary',
+    empty: 'No beneficiaries yet.',
+    loadError: 'Could not load beneficiaries',
+    name: 'Name',
+    kind: 'Kind',
+    sort: 'Sort order',
+    status: 'Status',
+    actions: 'Actions',
+    createTitle: 'Create beneficiary',
+    createSubtitle: 'Add a person or group for expenses',
+    editTitle: 'Edit beneficiary',
+    editSubtitle: 'Update beneficiary details',
+    save: 'Save',
+    create: 'Create',
+    saving: 'Saving…',
+    archive: 'Archive',
+    restore: 'Restore',
+    confirmArchive:
+      'Archive this beneficiary? It stays in history but is hidden from new expenses.',
+    back: 'Back',
+    filterAll: 'All',
+    filterActive: 'Active',
+    filterArchived: 'Archived',
+    readOnly: 'Members can view beneficiaries. Only admins can change them.',
+    nameRequired: 'Name is required',
+    kindRequired: 'Kind is required',
+    saveError: 'Could not save beneficiary',
+    statusError: 'Could not update beneficiary status',
+    kindPerson: 'Person',
+    kindHousehold: 'Household',
+    kindOther: 'Other',
+  },
+};
+
+const MY = {
+  beneficiaries: {
+    title: 'အကျိုးခံစားသူများ',
+    subtitle: 'အသုံးစရိတ်နှင့် သက်ဆိုင်သူများ',
+    add: 'အကျိုးခံစားသူ ထည့်ရန်',
+    empty: 'အကျိုးခံစားသူ မရှိသေးပါ။',
+    loadError: 'အကျိုးခံစားသူများ ဖတ်မရပါ',
+    name: 'အမည်',
+    kind: 'အမျိုးအစား',
+    sort: 'အစဉ်',
+    status: 'အခြေအနေ',
+    actions: 'လုပ်ဆောင်ချက်',
+    createTitle: 'အကျိုးခံစားသူ အသစ်',
+    createSubtitle: 'အသုံးစရိတ်အတွက် လူ သို့မဟုတ် အုပ်စု ထည့်ရန်',
+    editTitle: 'အကျိုးခံစားသူ ပြင်ရန်',
+    editSubtitle: 'အကျိုးခံစားသူ အချက်အလက် ပြင်ရန်',
+    save: 'သိမ်းရန်',
+    create: 'ဖန်တီးရန်',
+    saving: 'သိမ်းနေသည်…',
+    archive: 'စုသိမ်းရန်',
+    restore: 'ပြန်ဖွင့်ရန်',
+    confirmArchive:
+      'ဤအကျိုးခံစားသူကို စုသိမ်းမလား။ မှတ်တမ်းတွင် ကျန်မည်ဖြစ်ပြီး အသစ်တွင် မပေါ်ပါ။',
+    back: 'နောက်သို့',
+    filterAll: 'အားလုံး',
+    filterActive: 'အသုံးပြုနေ',
+    filterArchived: 'စုသိမ်းပြီး',
+    readOnly: 'အဖွဲ့ဝင်များ ကြည့်နိုင်သည်။ ပြင်ဆင်ရန် admin လိုအပ်သည်။',
+    nameRequired: 'အမည် လိုအပ်သည်',
+    kindRequired: 'အမျိုးအစား လိုအပ်သည်',
+    saveError: 'အကျိုးခံစားသူ သိမ်းမရပါ',
+    statusError: 'အခြေအနေ ပြင်မရပါ',
+    kindPerson: 'လူ',
+    kindHousehold: 'မိသားစု',
+    kindOther: 'အခြား',
+  },
+};
+
+export const BENEFICIARIES_I18N = new InjectionToken<boolean>('BENEFICIARIES_I18N');
+
+/** Merge feature strings into ngx-translate without editing scaffold asset files. */
+export function provideBeneficiariesI18n() {
+  return {
+    provide: BENEFICIARIES_I18N,
+    useFactory: () => {
+      const translate = inject(TranslateService);
+      translate.setTranslation('en', EN, true);
+      translate.setTranslation('my', MY, true);
+      return true;
+    },
+  };
+}
