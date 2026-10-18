@@ -1,0 +1,79 @@
+<div class="min-h-dvh bg-surface-50 text-surface-900">
+  <header class="border-b border-surface-200 bg-surface-0">
+    <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
+      <div class="flex min-w-0 items-center gap-6">
+        <a routerLink="/dashboard" class="truncate text-lg font-semibold tracking-tight text-primary">
+          {{ 'app.name' | translate }}
+        </a>
+        <nav class="hidden items-center gap-1 sm:flex" aria-label="Primary">
+          <a
+            routerLink="/dashboard"
+            routerLinkActive="bg-primary/10 text-primary"
+            class="rounded-md px-3 py-2 text-sm font-medium text-surface-700 hover:bg-surface-100"
+          >
+            {{ 'nav.dashboard' | translate }}
+          </a>
+          <a
+            routerLink="/expenses"
+            routerLinkActive="bg-primary/10 text-primary"
+            class="rounded-md px-3 py-2 text-sm font-medium text-surface-700 hover:bg-surface-100"
+          >
+            {{ 'nav.expenses' | translate }}
+          </a>
+          <a
+            routerLink="/categories"
+            routerLinkActive="bg-primary/10 text-primary"
+            class="rounded-md px-3 py-2 text-sm font-medium text-surface-700 hover:bg-surface-100"
+          >
+            {{ 'nav.categories' | translate }}
+          </a>
+        </nav>
+      </div>
+
+      <div class="flex items-center gap-2">
+        @if (household(); as hh) {
+          <span class="hidden text-sm text-surface-500 md:inline">{{ hh.name }}</span>
+        }
+        @if (user(); as u) {
+          <span class="hidden max-w-40 truncate text-sm text-surface-600 lg:inline">{{ u.displayName }}</span>
+        }
+        <app-language-switcher />
+        <p-button
+          [label]="'nav.logout' | translate"
+          severity="secondary"
+          [outlined]="true"
+          size="small"
+          (onClick)="logout()"
+        />
+      </div>
+    </div>
+
+    <nav class="flex gap-1 overflow-x-auto border-t border-surface-100 px-2 py-1 sm:hidden" aria-label="Mobile">
+      <a
+        routerLink="/dashboard"
+        routerLinkActive="bg-primary/10 text-primary"
+        class="whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium text-surface-700"
+      >
+        {{ 'nav.dashboard' | translate }}
+      </a>
+      <a
+        routerLink="/expenses"
+        routerLinkActive="bg-primary/10 text-primary"
+        class="whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium text-surface-700"
+      >
+        {{ 'nav.expenses' | translate }}
+      </a>
+      <a
+        routerLink="/categories"
+        routerLinkActive="bg-primary/10 text-primary"
+        class="whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium text-surface-700"
+      >
+        {{ 'nav.categories' | translate }}
+      </a>
+    </nav>
+  </header>
+
+  <main class="mx-auto max-w-6xl px-0 py-0 sm:px-4 sm:py-6">
+    <router-outlet />
+  </main>
+</div>
