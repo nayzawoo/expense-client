@@ -7,6 +7,7 @@
     "dashboard": "Dashboard",
     "expenses": "Expenses",
     "incomes": "Income",
+    "transfers": "Transfers",
     "categories": "Categories",
     "accounts": "Accounts",
     "logout": "Sign out",
