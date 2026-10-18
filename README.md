@@ -70,6 +70,7 @@ src/app/
     dashboard/    # household overview and reports
     expenses/     # expense list / create / edit / void
     incomes/      # income list / create / void
+    transfers/    # transfer list / create / void
     categories/   # category list and admin form
     accounts/     # account balances list + admin create
 ```

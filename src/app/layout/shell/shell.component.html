@@ -28,6 +28,13 @@
             {{ 'nav.incomes' | translate }}
           </a>
           <a
+            routerLink="/transfers"
+            routerLinkActive="bg-primary/10 text-primary"
+            class="rounded-md px-3 py-2 text-sm font-medium text-surface-700 hover:bg-surface-100"
+          >
+            {{ 'nav.transfers' | translate }}
+          </a>
+          <a
             routerLink="/categories"
             routerLinkActive="bg-primary/10 text-primary"
             class="rounded-md px-3 py-2 text-sm font-medium text-surface-700 hover:bg-surface-100"
@@ -86,6 +93,13 @@
         class="whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium text-surface-700"
       >
         {{ 'nav.incomes' | translate }}
+      </a>
+      <a
+        routerLink="/transfers"
+        routerLinkActive="bg-primary/10 text-primary"
+        class="whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium text-surface-700"
+      >
+        {{ 'nav.transfers' | translate }}
       </a>
       <a
         routerLink="/categories"
