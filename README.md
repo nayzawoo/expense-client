@@ -5,7 +5,7 @@ Angular frontend for the household expense API (`expense-api`).
 ## Stack
 
 - Angular 22
-- PrimeNG 22 (Aura theme via `@primeuix/themes`) + Tailwind CSS 4 (`tailwindcss-primeui`)
+- Tailwind CSS 4 + project-owned reusable UI components (semantic HTML; Angular CDK available for complex interactions)
 - `@ngx-translate` for English (`en`) and Myanmar (`my`)
 - Session cookie auth + CSRF against Spring (`expense-session`)
 
@@ -40,7 +40,6 @@ Open [http://localhost:4200](http://localhost:4200).
 | Setting | Description |
 | --- | --- |
 | `apiBaseUrl` | API origin **without** trailing slash. Leave empty for same-origin / proxy. Example: `https://api.example.com` |
-| `primeNgLicenseKey` | Optional PrimeUI community/commercial license key for PrimeNG 22 |
 | `defaultLanguage` | `en` or `my` |
 
 Language choice is remembered in `localStorage` under `expense_lang`.
@@ -64,28 +63,11 @@ Writes use cookie credentials and CSRF headers. Do not store session tokens in `
 ```
 src/app/
   core/           # auth, HTTP interceptors, i18n, API helpers
-  shared/         # reusable UI helpers
+  shared/         # reusable UI components, icons, pipes
   layout/         # authenticated shell
   features/
     auth/         # login + forced-password shell
-    dashboard/    # lazy placeholder (parallel feature branch)
-    expenses/     # lazy placeholder (parallel feature branch)
-    categories/   # lazy placeholder (parallel feature branch)
+    dashboard/    # household overview and reports
+    expenses/     # expense list / create / edit / void
+    categories/   # category list and admin form
 ```
-
-## Cursor MCP (PrimeNG docs)
-
-Committed at `.cursor/mcp.json`:
-
-```json
-{
-  "mcpServers": {
-    "primeng": {
-      "command": "npx",
-      "args": ["-y", "@primeng/mcp"]
-    }
-  }
-}
-```
-
-Cloud Agents still need the same server enabled in the Agents MCP UI.

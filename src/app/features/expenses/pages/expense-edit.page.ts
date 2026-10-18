@@ -1,11 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { Button } from 'primeng/button';
-import { Message } from 'primeng/message';
-import { ProgressSpinner } from 'primeng/progressspinner';
 import { forkJoin } from 'rxjs';
 import { LanguageService } from '../../../core';
+import { UiAlertComponent } from '../../../shared/ui/ui-alert.component';
+import { UiButtonComponent } from '../../../shared/ui/ui-button.component';
+import { UiSpinnerComponent } from '../../../shared/ui/ui-spinner.component';
 import { ExpenseFormComponent } from '../components/expense-form.component';
 import { ExpenseApiService } from '../data/expense-api.service';
 import { expenseT, type ExpenseMessageKey } from '../data/expense-i18n';
@@ -19,7 +19,14 @@ import type {
 @Component({
   selector: 'app-expense-edit-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, Button, Message, ProgressSpinner, ExpenseFormComponent],
+  imports: [
+    CommonModule,
+    RouterLink,
+    UiButtonComponent,
+    UiAlertComponent,
+    UiSpinnerComponent,
+    ExpenseFormComponent,
+  ],
   template: `
     <div class="mx-auto flex w-full max-w-lg flex-col">
       <header class="border-b border-surface-200 px-4 py-4 md:px-6">
@@ -37,12 +44,12 @@ import type {
       <div class="p-4 md:p-6">
         @if (loading()) {
           <div class="flex justify-center py-16">
-            <p-progress-spinner strokeWidth="4" />
+            <app-ui-spinner />
           </div>
         } @else if (error()) {
           <div class="flex flex-col gap-3">
-            <p-message severity="error" styleClass="w-full">{{ error() }}</p-message>
-            <p-button [label]="label('retry')" (onClick)="load()" />
+            <app-ui-alert severity="error">{{ error() }}</app-ui-alert>
+            <app-ui-button (clicked)="load()">{{ label('retry') }}</app-ui-button>
           </div>
         } @else if (expense()) {
           <app-expense-form

@@ -5,12 +5,8 @@ import {
   inject,
   provideBrowserGlobalErrorListeners,
 } from '@angular/core';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter } from '@angular/router';
-import Aura from '@primeuix/themes/aura';
-import { providePrimeNG } from 'primeng/config';
 import { firstValueFrom } from 'rxjs';
-import { environment } from '../environments/environment';
 import { routes } from './app.routes';
 import {
   AuthService,
@@ -34,23 +30,7 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
     provideHttpClient(withInterceptors([credentialsInterceptor, csrfInterceptor])),
-    provideAnimationsAsync(),
     provideI18n(),
-    providePrimeNG({
-      theme: {
-        preset: Aura,
-        options: {
-          darkModeSelector: false,
-          cssLayer: {
-            name: 'primeng',
-            order: 'theme, base, primeng, utilities',
-          },
-        },
-      },
-      ...(environment.primeNgLicenseKey
-        ? { license: environment.primeNgLicenseKey }
-        : {}),
-    }),
     {
       provide: APP_INITIALIZER,
       multi: true,

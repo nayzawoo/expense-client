@@ -1,11 +1,13 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { Message } from 'primeng/message';
-import { Skeleton } from 'primeng/skeleton';
-import { Tag } from 'primeng/tag';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../../core';
-import { MoneyPipe } from '../../../shared';
+import {
+  MoneyPipe,
+  UiAlertComponent,
+  UiBadgeComponent,
+  UiSkeletonComponent,
+} from '../../../shared';
 import { SpendingPaceChartComponent } from '../components/spending-pace-chart';
 import { DashboardApi } from '../data/dashboard.api';
 import { DashboardPayload } from '../data/dashboard.models';
@@ -16,23 +18,23 @@ import { DashboardPayload } from '../data/dashboard.models';
   imports: [
     TranslatePipe,
     MoneyPipe,
-    Message,
-    Skeleton,
-    Tag,
+    UiAlertComponent,
+    UiSkeletonComponent,
+    UiBadgeComponent,
     SpendingPaceChartComponent,
   ],
   template: `
     <div class="flex flex-col gap-4 p-4 md:gap-6 md:p-6">
       @if (loading()) {
-        <p-skeleton height="2.5rem" width="12rem" />
-        <p-skeleton height="8rem" />
+        <app-ui-skeleton height="2.5rem" width="12rem" />
+        <app-ui-skeleton height="8rem" />
         <div class="grid gap-4 sm:grid-cols-3">
-          <p-skeleton height="6rem" />
-          <p-skeleton height="6rem" />
-          <p-skeleton height="6rem" />
+          <app-ui-skeleton height="6rem" />
+          <app-ui-skeleton height="6rem" />
+          <app-ui-skeleton height="6rem" />
         </div>
       } @else if (error()) {
-        <p-message severity="error" styleClass="w-full">{{ error() }}</p-message>
+        <app-ui-alert severity="error">{{ error() }}</app-ui-alert>
       } @else if (data(); as d) {
         <header class="flex flex-wrap items-end justify-between gap-3">
           <div>
@@ -44,7 +46,10 @@ import { DashboardPayload } from '../data/dashboard.models';
             </p>
           </div>
           @if (!d.comparisonPeriod.coverage.complete) {
-            <p-tag severity="warn" [value]="'dashboard.coverageIncomplete' | translate" />
+            <app-ui-badge
+              severity="warn"
+              [value]="'dashboard.coverageIncomplete' | translate"
+            />
           }
         </header>
 

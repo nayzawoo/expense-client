@@ -22,7 +22,9 @@
     "newPassword": "New password",
     "confirmPassword": "Confirm password",
     "savePassword": "Save password",
-    "placeholderNote": "Password change UI is wired for the session API; finish flow in a follow-up slice."
+    "placeholderNote": "Password change UI is wired for the session API; finish flow in a follow-up slice.",
+    "showPassword": "Show",
+    "hidePassword": "Hide"
   },
   "placeholder": {
     "title": "Coming soon",

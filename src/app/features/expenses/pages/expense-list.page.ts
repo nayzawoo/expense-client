@@ -2,20 +2,15 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { MessageService } from 'primeng/api';
-import { Button } from 'primeng/button';
-import { DatePicker } from 'primeng/datepicker';
-import { Dialog } from 'primeng/dialog';
-import { IconField } from 'primeng/iconfield';
-import { InputIcon } from 'primeng/inputicon';
-import { InputText } from 'primeng/inputtext';
-import { Message } from 'primeng/message';
-import { ProgressSpinner } from 'primeng/progressspinner';
-import { Select } from 'primeng/select';
-import { Textarea } from 'primeng/textarea';
-import { Toast } from 'primeng/toast';
 import { LanguageService } from '../../../core';
-import { MoneyPipe } from '../../../shared';
+import { IconComponent } from '../../../shared/icons/icon.component';
+import { MoneyPipe } from '../../../shared/pipes/money.pipe';
+import { ToastService } from '../../../shared/ui/toast.service';
+import { UiAlertComponent } from '../../../shared/ui/ui-alert.component';
+import { UiButtonComponent } from '../../../shared/ui/ui-button.component';
+import { UiDialogComponent } from '../../../shared/ui/ui-dialog.component';
+import { UiSpinnerComponent } from '../../../shared/ui/ui-spinner.component';
+import { UiToastComponent } from '../../../shared/ui/ui-toast.component';
 import { ExpenseApiService } from '../data/expense-api.service';
 import {
   DATE_PRESET_OPTIONS,
@@ -39,26 +34,21 @@ import type {
 @Component({
   selector: 'app-expense-list-page',
   standalone: true,
-  providers: [MessageService],
+  providers: [ToastService],
   imports: [
     CommonModule,
     FormsModule,
     RouterLink,
-    Button,
-    DatePicker,
-    Dialog,
-    IconField,
-    InputIcon,
-    InputText,
-    Message,
-    ProgressSpinner,
-    Select,
-    Textarea,
-    Toast,
+    IconComponent,
+    UiButtonComponent,
+    UiAlertComponent,
+    UiSpinnerComponent,
+    UiDialogComponent,
+    UiToastComponent,
     MoneyPipe,
   ],
   template: `
-    <p-toast />
+    <app-ui-toast />
 
     <div class="mx-auto flex w-full max-w-3xl flex-col gap-5 p-4 md:p-6">
       <header class="flex flex-wrap items-start justify-between gap-3">
@@ -66,19 +56,26 @@ import type {
           <h1 class="text-2xl font-bold tracking-tight">{{ label('title') }}</h1>
           <p class="mt-1 text-sm text-surface-500">{{ label('description') }}</p>
         </div>
-        <p-button [routerLink]="['new']" [label]="label('add')" icon="pi pi-plus" />
+        <a
+          [routerLink]="['new']"
+          class="inline-flex items-center gap-2 rounded-lg bg-teal-700 px-4 py-2 text-sm font-semibold text-white no-underline hover:bg-teal-800"
+        >
+          <app-icon name="plus" />
+          {{ label('add') }}
+        </a>
       </header>
 
-      <p-iconfield class="w-full">
-        <p-inputicon styleClass="pi pi-search" />
+      <label class="relative block w-full">
+        <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-surface-400">
+          <app-icon name="search" />
+        </span>
         <input
-          pInputText
-          class="w-full"
+          class="ui-input pl-10"
           [placeholder]="label('searchPlaceholder')"
           [(ngModel)]="searchInput"
           (ngModelChange)="onSearch($event)"
         />
-      </p-iconfield>
+      </label>
 
       <div class="flex flex-wrap gap-2">
         @for (preset of presets; track preset.value) {
@@ -98,56 +95,53 @@ import type {
       </div>
 
       <div class="flex flex-wrap gap-2">
-        <p-select
-          [options]="categorySelectOptions()"
-          optionLabel="label"
-          optionValue="value"
+        <select
+          class="ui-input min-w-40"
           [ngModel]="filters().categoryId"
           (ngModelChange)="patchFilters({ categoryId: $event || null })"
-          [placeholder]="label('allCategories')"
-          styleClass="min-w-40"
-        />
-        <p-select
-          [options]="accountSelectOptions()"
-          optionLabel="label"
-          optionValue="value"
+        >
+          @for (opt of categorySelectOptions(); track opt.value ?? 'all') {
+            <option [ngValue]="opt.value">{{ opt.label }}</option>
+          }
+        </select>
+        <select
+          class="ui-input min-w-40"
           [ngModel]="filters().accountId"
           (ngModelChange)="patchFilters({ accountId: $event || null })"
-          [placeholder]="label('allAccounts')"
-          styleClass="min-w-40"
-        />
-        <p-select
-          [options]="beneficiarySelectOptions()"
-          optionLabel="label"
-          optionValue="value"
+        >
+          @for (opt of accountSelectOptions(); track opt.value ?? 'all') {
+            <option [ngValue]="opt.value">{{ opt.label }}</option>
+          }
+        </select>
+        <select
+          class="ui-input min-w-40"
           [ngModel]="filters().beneficiaryId"
           (ngModelChange)="patchFilters({ beneficiaryId: $event || null })"
-          [placeholder]="label('allPeople')"
-          styleClass="min-w-40"
-        />
-        <p-button
-          [label]="label('clear')"
-          severity="secondary"
-          [outlined]="true"
-          (onClick)="clearFilters()"
-        />
+        >
+          @for (opt of beneficiarySelectOptions(); track opt.value ?? 'all') {
+            <option [ngValue]="opt.value">{{ opt.label }}</option>
+          }
+        </select>
+        <app-ui-button variant="secondary" (clicked)="clearFilters()">
+          {{ label('clear') }}
+        </app-ui-button>
       </div>
 
       @if (filters().datePreset === 'custom') {
         <div class="flex flex-wrap gap-2">
-          <p-datepicker
+          <input
+            class="ui-input w-auto"
+            type="date"
             [ngModel]="dateFromModel"
             (ngModelChange)="onCustomFrom($event)"
-            dateFormat="yy-mm-dd"
-            [showIcon]="true"
-            placeholder="From"
+            [attr.aria-label]="label('date')"
           />
-          <p-datepicker
+          <input
+            class="ui-input w-auto"
+            type="date"
             [ngModel]="dateToModel"
             (ngModelChange)="onCustomTo($event)"
-            dateFormat="yy-mm-dd"
-            [showIcon]="true"
-            placeholder="To"
+            [attr.aria-label]="label('date')"
           />
         </div>
       }
@@ -160,12 +154,12 @@ import type {
 
       @if (loading()) {
         <div class="flex justify-center py-16">
-          <p-progress-spinner strokeWidth="4" />
+          <app-ui-spinner />
         </div>
       } @else if (error()) {
         <div class="flex flex-col items-start gap-3">
-          <p-message severity="error" styleClass="w-full">{{ error() }}</p-message>
-          <p-button [label]="label('retry')" (onClick)="reload()" />
+          <app-ui-alert severity="error">{{ error() }}</app-ui-alert>
+          <app-ui-button (clicked)="reload()">{{ label('retry') }}</app-ui-button>
         </div>
       } @else if (groups().length === 0) {
         <div
@@ -218,7 +212,7 @@ import type {
                               [routerLink]="[expense.id, 'edit']"
                               [attr.aria-label]="label('edit')"
                             >
-                              <i class="pi pi-pencil text-sm"></i>
+                              <app-icon name="pencil" />
                             </a>
                           }
                           @if (expense.capabilities.canVoid) {
@@ -228,7 +222,7 @@ import type {
                               [attr.aria-label]="label('void')"
                               (click)="openVoid(expense)"
                             >
-                              <i class="pi pi-trash text-sm"></i>
+                              <app-icon name="trash" />
                             </button>
                           }
                         </div>
@@ -243,40 +237,36 @@ import type {
       }
     </div>
 
-    <p-dialog
-      [header]="label('voidTitle')"
-      [modal]="true"
-      [visible]="voidTarget() !== null"
-      (visibleChange)="!$event && closeVoid()"
-      [style]="{ width: 'min(100%, 28rem)' }"
+    <app-ui-dialog
+      [open]="voidTarget() !== null"
+      [title]="label('voidTitle')"
+      (closed)="closeVoid()"
     >
       <p class="mb-3 text-sm text-surface-600">{{ label('voidConfirm') }}</p>
       <label class="flex flex-col gap-1.5 text-sm font-medium">
         {{ label('voidReason') }}
-        <textarea pTextarea [(ngModel)]="voidReason" rows="3" class="w-full"></textarea>
+        <textarea class="ui-input" [(ngModel)]="voidReason" rows="3"></textarea>
       </label>
       <div class="mt-4 flex justify-end gap-2">
-        <p-button
-          [label]="label('cancel')"
-          severity="secondary"
-          [outlined]="true"
-          (onClick)="closeVoid()"
-        />
-        <p-button
-          [label]="label('void')"
-          severity="danger"
+        <app-ui-button variant="secondary" (clicked)="closeVoid()">
+          {{ label('cancel') }}
+        </app-ui-button>
+        <app-ui-button
+          variant="danger"
           [loading]="voiding()"
           [disabled]="!voidReason.trim() || voiding()"
-          (onClick)="confirmVoid()"
-        />
+          (clicked)="confirmVoid()"
+        >
+          {{ label('void') }}
+        </app-ui-button>
       </div>
-    </p-dialog>
+    </app-ui-dialog>
   `,
 })
 export class ExpenseListPage implements OnInit {
   private readonly api = inject(ExpenseApiService);
   private readonly language = inject(LanguageService);
-  private readonly messages = inject(MessageService);
+  private readonly toast = inject(ToastService);
 
   readonly presets = DATE_PRESET_OPTIONS;
   readonly loading = signal(true);
@@ -291,8 +281,8 @@ export class ExpenseListPage implements OnInit {
 
   searchInput = '';
   voidReason = '';
-  dateFromModel: Date | null = null;
-  dateToModel: Date | null = null;
+  dateFromModel = '';
+  dateToModel = '';
   private searchTimer: ReturnType<typeof setTimeout> | null = null;
 
   readonly filtered = computed(() => filterExpenses(this.items(), this.filters()));
@@ -370,14 +360,14 @@ export class ExpenseListPage implements OnInit {
     });
   }
 
-  onCustomFrom(value: Date | null): void {
+  onCustomFrom(value: string): void {
     this.dateFromModel = value;
-    this.patchFilters({ dateFrom: value ? this.toIso(value) : null, datePreset: 'custom' });
+    this.patchFilters({ dateFrom: value || null, datePreset: 'custom' });
   }
 
-  onCustomTo(value: Date | null): void {
+  onCustomTo(value: string): void {
     this.dateToModel = value;
-    this.patchFilters({ dateTo: value ? this.toIso(value) : null, datePreset: 'custom' });
+    this.patchFilters({ dateTo: value || null, datePreset: 'custom' });
   }
 
   patchFilters(patch: Partial<ExpenseListFilters>): void {
@@ -386,8 +376,8 @@ export class ExpenseListPage implements OnInit {
 
   clearFilters(): void {
     this.searchInput = '';
-    this.dateFromModel = null;
-    this.dateToModel = null;
+    this.dateFromModel = '';
+    this.dateToModel = '';
     this.filters.set(defaultExpenseFilters());
   }
 
@@ -455,23 +445,13 @@ export class ExpenseListPage implements OnInit {
       next: () => {
         this.voiding.set(false);
         this.closeVoid();
-        this.messages.add({ severity: 'success', summary: this.label('voidSuccess') });
+        this.toast.show('success', this.label('voidSuccess'));
         this.reload();
       },
       error: (err: { status?: number }) => {
         this.voiding.set(false);
-        this.messages.add({
-          severity: 'error',
-          summary: String(err?.status ?? 'Error'),
-        });
+        this.toast.show('error', String(err?.status ?? 'Error'));
       },
     });
-  }
-
-  private toIso(value: Date): string {
-    const y = value.getFullYear();
-    const m = String(value.getMonth() + 1).padStart(2, '0');
-    const d = String(value.getDate()).padStart(2, '0');
-    return `${y}-${m}-${d}`;
   }
 }

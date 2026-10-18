@@ -2,12 +2,10 @@ import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
-import { Button } from 'primeng/button';
-import { InputText } from 'primeng/inputtext';
-import { Message } from 'primeng/message';
-import { Password } from 'primeng/password';
 import { AuthService } from '../../../core/auth/auth.service';
 import { LanguageSwitcherComponent } from '../../../shared/components/language-switcher/language-switcher.component';
+import { UiAlertComponent } from '../../../shared/ui/ui-alert.component';
+import { UiButtonComponent } from '../../../shared/ui/ui-button.component';
 
 @Component({
   selector: 'app-login-page',
@@ -15,10 +13,8 @@ import { LanguageSwitcherComponent } from '../../../shared/components/language-s
   imports: [
     ReactiveFormsModule,
     TranslatePipe,
-    Button,
-    InputText,
-    Password,
-    Message,
+    UiButtonComponent,
+    UiAlertComponent,
     LanguageSwitcherComponent,
   ],
   templateUrl: './login.page.html',
@@ -30,6 +26,7 @@ export class LoginPage {
 
   readonly submitting = signal(false);
   readonly error = signal(false);
+  readonly showPassword = signal(false);
 
   readonly form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
