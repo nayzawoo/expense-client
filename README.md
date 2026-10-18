@@ -66,8 +66,9 @@ src/app/
   shared/         # reusable UI components, icons, pipes
   layout/         # authenticated shell
   features/
-    auth/         # login + forced-password shell
+    auth/         # login + forced password change
     dashboard/    # household overview and reports
     expenses/     # expense list / create / edit / void
     categories/   # category list and admin form
+    accounts/     # account balances list + admin create
 ```

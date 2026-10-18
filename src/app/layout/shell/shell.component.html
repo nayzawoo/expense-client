@@ -27,6 +27,13 @@
           >
             {{ 'nav.categories' | translate }}
           </a>
+          <a
+            routerLink="/accounts"
+            routerLinkActive="bg-primary/10 text-primary"
+            class="rounded-md px-3 py-2 text-sm font-medium text-surface-700 hover:bg-surface-100"
+          >
+            {{ 'nav.accounts' | translate }}
+          </a>
         </nav>
       </div>
 
@@ -65,6 +72,13 @@
         class="whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium text-surface-700"
       >
         {{ 'nav.categories' | translate }}
+      </a>
+      <a
+        routerLink="/accounts"
+        routerLinkActive="bg-primary/10 text-primary"
+        class="whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium text-surface-700"
+      >
+        {{ 'nav.accounts' | translate }}
       </a>
     </nav>
   </header>

@@ -83,6 +83,27 @@ export class AuthService {
     );
   }
 
+  /**
+   * Rotate password. Server returns 204 and invalidates the session.
+   * Clears local auth state; caller should send the user to login.
+   */
+  changePassword(currentPassword: string, newPassword: string): Observable<void> {
+    return this.http
+      .put<void>(
+        apiV1('/password'),
+        { currentPassword, newPassword },
+        { withCredentials: true, headers: this.csrfHeaders() },
+      )
+      .pipe(
+        tap(() => {
+          this.userSignal.set(null);
+          this.householdSignal.set(null);
+          this.csrfTokenSignal.set(null);
+        }),
+        switchMap(() => this.refreshCsrf().pipe(map(() => void 0), catchError(() => of(void 0)))),
+      );
+  }
+
   logout(): Observable<void> {
     const headers = this.csrfHeaders();
     return this.http

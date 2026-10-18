@@ -7,6 +7,7 @@
     "dashboard": "ဒက်ရှ်ဘုတ်",
     "expenses": "အသုံးစရိတ်",
     "categories": "အမျိုးအစားများ",
+    "accounts": "အကောင့်များ",
     "logout": "ထွက်မည်",
     "language": "ဘာသာစကား"
   },
@@ -22,7 +23,11 @@
     "newPassword": "စကားဝှက်အသစ်",
     "confirmPassword": "စကားဝှက် အတည်ပြုရန်",
     "savePassword": "စကားဝှက် သိမ်းမည်",
-    "placeholderNote": "စကားဝှက်ပြောင်း UI ကို session API နှင့် ချိတ်ဆက်ထားပြီး နောက်အဆင့်တွင် ပြီးစီးမည်။",
+    "passwordTooShort": "စကားဝှက်အသစ်သည် အနည်းဆုံး စာလုံး ၈ လုံး ရှိရမည်။",
+    "passwordMismatch": "စကားဝှက်အသစ်နှင့် အတည်ပြုချက် မတူပါ။",
+    "currentPasswordWrong": "လက်ရှိ စကားဝှက် မမှန်ပါ။",
+    "changePasswordFailed": "စကားဝှက် ပြောင်းမရပါ။ ထပ်ကြိုးစားပါ။",
+    "passwordChanged": "စကားဝှက် ပြောင်းပြီးပါပြီ။ စကားဝှက်အသစ်ဖြင့် ပြန်ဝင်ပါ။",
     "showPassword": "ပြရန်",
     "hidePassword": "ဖျောက်ရန်"
   },

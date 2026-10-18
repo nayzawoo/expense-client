@@ -27,6 +27,10 @@ export class LoginPage {
   readonly submitting = signal(false);
   readonly error = signal(false);
   readonly showPassword = signal(false);
+  readonly passwordChanged = signal(
+    typeof history !== 'undefined' &&
+      (history.state as { passwordChanged?: boolean } | null)?.passwordChanged === true,
+  );
 
   readonly form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],

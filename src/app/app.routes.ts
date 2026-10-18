@@ -26,6 +26,11 @@ export const routes: Routes = [
         loadChildren: () =>
           import('./features/categories/categories.routes').then((m) => m.CATEGORIES_ROUTES),
       },
+      {
+        path: 'accounts',
+        loadChildren: () =>
+          import('./features/accounts/accounts.routes').then((m) => m.ACCOUNTS_ROUTES),
+      },
     ],
   },
   { path: '**', redirectTo: 'dashboard' },
