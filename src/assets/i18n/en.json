@@ -6,6 +6,7 @@
   "nav": {
     "dashboard": "Dashboard",
     "expenses": "Expenses",
+    "incomes": "Income",
     "categories": "Categories",
     "accounts": "Accounts",
     "logout": "Sign out",
