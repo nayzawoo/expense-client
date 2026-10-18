@@ -69,6 +69,7 @@ src/app/
     auth/         # login + forced password change
     dashboard/    # household overview and reports
     expenses/     # expense list / create / edit / void
+    incomes/      # income list / create / void
     categories/   # category list and admin form
     accounts/     # account balances list + admin create
 ```
