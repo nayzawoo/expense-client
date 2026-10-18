@@ -1,0 +1,84 @@
+import { InjectionToken, inject } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
+
+const EN = {
+  dashboard: {
+    title: 'Dashboard',
+    asOf: 'As of',
+    loadError: 'Could not load dashboard',
+    totalBalance: 'Total balance',
+    accounts: 'Accounts',
+    negativeWarn: 'Negative balance',
+    expense: 'Expense',
+    income: 'Income',
+    net: 'Net',
+    vsPrevious: 'vs same period last month',
+    avgPerDay: 'Avg / day so far',
+    spendingPace: 'Spending this month',
+    spendingPaceHint: 'Cumulative pace vs same period last month',
+    current: 'Current',
+    previous: 'Previous',
+    noPace: 'No spending recorded yet this month.',
+    topCategories: 'Top spending',
+    topCategoriesHint: 'Leading categories this period',
+    noCategories: 'No spending recorded this period.',
+    categoryUp: 'Increased',
+    categoryDown: 'Decreased',
+    categoryChanges: 'Category changes',
+    categoryChangesHint: 'Compared with the previous period',
+    noChanges: 'No category changes to show.',
+    recent: 'Recent activity',
+    noActivity: 'No recent activity.',
+    byPerson: 'Spending by person',
+    noPeople: 'No beneficiary spending yet.',
+    coverageIncomplete: 'Comparison coverage is incomplete for this period.',
+  },
+};
+
+const MY = {
+  dashboard: {
+    title: 'ဒက်ရှ်ဘုတ်',
+    asOf: 'ရက်စွဲ',
+    loadError: 'ဒက်ရှ်ဘုတ် ဖတ်မရပါ',
+    totalBalance: 'စုစုပေါင်း လက်ကျန်',
+    accounts: 'အကောင့်များ',
+    negativeWarn: 'အနုတ် လက်ကျန်',
+    expense: 'အသုံးစရိတ်',
+    income: 'ဝင်ငွေ',
+    net: 'ကျန်ငွေ',
+    vsPrevious: 'ယခင်လ တူညီကာလနှင့်',
+    avgPerDay: 'နေ့စဉ် ပျမ်းမျှ',
+    spendingPace: 'ဤလ အသုံးစရိတ်',
+    spendingPaceHint: 'ယခင်လ တူညီကာလနှင့် စုစုပေါင်း နှိုင်းယှဉ်',
+    current: 'ယခု',
+    previous: 'ယခင်',
+    noPace: 'ဤလတွင် အသုံးစရိတ် မရှိသေးပါ။',
+    topCategories: 'အများဆုံး အသုံးစရိတ်',
+    topCategoriesHint: 'ဤကာလ၏ ထိပ်တန်း အမျိုးအစားများ',
+    noCategories: 'ဤကာလတွင် အသုံးစရိတ် မရှိပါ။',
+    categoryUp: 'တိုးလာ',
+    categoryDown: 'လျော့သွား',
+    categoryChanges: 'အမျိုးအစား ပြောင်းလဲမှု',
+    categoryChangesHint: 'ယခင်ကာလနှင့် နှိုင်းယှဉ်',
+    noChanges: 'ပြောင်းလဲမှု မရှိပါ။',
+    recent: 'မကြာသေးမီ လှုပ်ရှားမှု',
+    noActivity: 'မကြာသေးမီ လှုပ်ရှားမှု မရှိပါ။',
+    byPerson: 'လူအလိုက် အသုံးစရိတ်',
+    noPeople: 'beneficiary အသုံးစရိတ် မရှိသေးပါ။',
+    coverageIncomplete: 'ဤကာလအတွက် နှိုင်းယှဉ် ဒေတာ မပြည့်စုံပါ။',
+  },
+};
+
+export const DASHBOARD_I18N = new InjectionToken<boolean>('DASHBOARD_I18N');
+
+export function provideDashboardI18n() {
+  return {
+    provide: DASHBOARD_I18N,
+    useFactory: () => {
+      const translate = inject(TranslateService);
+      translate.setTranslation('en', EN, true);
+      translate.setTranslation('my', MY, true);
+      return true;
+    },
+  };
+}
