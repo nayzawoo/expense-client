@@ -10,13 +10,9 @@ import {
   signal,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Button } from 'primeng/button';
-import { DatePicker } from 'primeng/datepicker';
-import { InputText } from 'primeng/inputtext';
-import { Message } from 'primeng/message';
-import { Select } from 'primeng/select';
-import { Textarea } from 'primeng/textarea';
 import { LanguageService } from '../../../core';
+import { UiAlertComponent } from '../../../shared/ui/ui-alert.component';
+import { UiButtonComponent } from '../../../shared/ui/ui-button.component';
 import { ExpenseApiService } from '../data/expense-api.service';
 import { expenseT, type ExpenseMessageKey } from '../data/expense-i18n';
 import type {
@@ -31,45 +27,28 @@ import type {
 @Component({
   selector: 'app-expense-form',
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    Button,
-    DatePicker,
-    InputText,
-    Message,
-    Select,
-    Textarea,
-  ],
+  imports: [CommonModule, ReactiveFormsModule, UiButtonComponent, UiAlertComponent],
   template: `
     <form class="flex flex-col gap-4" [formGroup]="form" (ngSubmit)="submit()">
       @if (error()) {
-        <p-message severity="error" styleClass="w-full">{{ error() }}</p-message>
+        <app-ui-alert severity="error">{{ error() }}</app-ui-alert>
       }
       @if (success()) {
-        <p-message severity="success" styleClass="w-full">{{ success() }}</p-message>
+        <app-ui-alert severity="success">{{ success() }}</app-ui-alert>
       }
 
       <label class="flex flex-col gap-1.5 text-sm font-medium">
         {{ label('date') }}
-        <p-datepicker
-          formControlName="effectiveDate"
-          dateFormat="yy-mm-dd"
-          [showIcon]="true"
-          [maxDate]="maxDate"
-          styleClass="w-full"
-          inputStyleClass="w-full"
-        />
+        <input class="ui-input" type="date" formControlName="effectiveDate" [attr.max]="maxDate" />
       </label>
 
       <label class="flex flex-col gap-1.5 text-sm font-medium">
         {{ label('amount') }}
         <input
-          pInputText
+          class="ui-input"
           formControlName="amount"
           inputmode="numeric"
           autocomplete="off"
-          class="w-full"
           placeholder="1000"
         />
         @if (form.controls.amount.touched && form.controls.amount.invalid) {
@@ -79,66 +58,51 @@ import type {
 
       <label class="flex flex-col gap-1.5 text-sm font-medium">
         {{ label('account') }}
-        <p-select
-          formControlName="accountId"
-          [options]="accountOptions"
-          optionLabel="name"
-          optionValue="id"
-          [filter]="true"
-          styleClass="w-full"
-        />
+        <select class="ui-input" formControlName="accountId">
+          @for (option of accountOptions; track option.id) {
+            <option [value]="option.id">{{ option.name }}</option>
+          }
+        </select>
       </label>
 
       <label class="flex flex-col gap-1.5 text-sm font-medium">
         {{ label('category') }}
-        <p-select
-          formControlName="categoryId"
-          [options]="categoryOptions"
-          optionLabel="name"
-          optionValue="id"
-          [filter]="true"
-          styleClass="w-full"
-        />
+        <select class="ui-input" formControlName="categoryId">
+          <option value="" disabled>{{ label('category') }}</option>
+          @for (option of categoryOptions; track option.id) {
+            <option [value]="option.id">{{ option.name }}</option>
+          }
+        </select>
       </label>
 
       <label class="flex flex-col gap-1.5 text-sm font-medium">
         {{ label('beneficiary') }}
-        <p-select
-          formControlName="beneficiaryId"
-          [options]="beneficiaryOptions"
-          optionLabel="name"
-          optionValue="id"
-          [filter]="true"
-          styleClass="w-full"
-        />
+        <select class="ui-input" formControlName="beneficiaryId">
+          @for (option of beneficiaryOptions; track option.id) {
+            <option [value]="option.id">{{ option.name }}</option>
+          }
+        </select>
       </label>
 
       <label class="flex flex-col gap-1.5 text-sm font-medium">
         {{ label('noteOptional') }}
-        <textarea pTextarea formControlName="note" rows="3" class="w-full"></textarea>
+        <textarea class="ui-input" formControlName="note" rows="3"></textarea>
       </label>
 
       @if (initial) {
         <label class="flex flex-col gap-1.5 text-sm font-medium">
           {{ label('changeReason') }}
-          <input pInputText formControlName="changeReason" class="w-full" />
+          <input class="ui-input" formControlName="changeReason" />
         </label>
       }
 
       <div class="flex flex-wrap gap-2 pt-2">
-        <p-button
-          type="submit"
-          [label]="label('save')"
-          [loading]="saving()"
-          [disabled]="form.invalid || saving()"
-        />
-        <p-button
-          type="button"
-          [label]="label('cancel')"
-          severity="secondary"
-          [outlined]="true"
-          (onClick)="cancelled.emit()"
-        />
+        <app-ui-button type="submit" [loading]="saving()" [disabled]="form.invalid || saving()">
+          {{ label('save') }}
+        </app-ui-button>
+        <app-ui-button type="button" variant="secondary" (clicked)="cancelled.emit()">
+          {{ label('cancel') }}
+        </app-ui-button>
       </div>
     </form>
   `,
@@ -156,13 +120,13 @@ export class ExpenseFormComponent implements OnChanges {
   @Output() readonly saved = new EventEmitter<ExpenseDto>();
   @Output() readonly cancelled = new EventEmitter<void>();
 
-  readonly maxDate = new Date();
+  readonly maxDate = this.toIsoDate(new Date())!;
   readonly saving = signal(false);
   readonly error = signal<string | null>(null);
   readonly success = signal<string | null>(null);
 
   readonly form = this.fb.nonNullable.group({
-    effectiveDate: [new Date() as Date | null, Validators.required],
+    effectiveDate: [this.toIsoDate(new Date())!, Validators.required],
     amount: ['', [Validators.required, Validators.pattern(/^\d+$/)]],
     accountId: ['', Validators.required],
     categoryId: ['', Validators.required],
@@ -210,7 +174,7 @@ export class ExpenseFormComponent implements OnChanges {
       return;
     }
     const raw = this.form.getRawValue();
-    const effectiveDate = this.toIsoDate(raw.effectiveDate);
+    const effectiveDate = raw.effectiveDate;
     if (!effectiveDate) {
       this.error.set(this.label('required'));
       return;
@@ -254,7 +218,7 @@ export class ExpenseFormComponent implements OnChanges {
     const firstBeneficiary = this.beneficiaryOptions[0]?.id ?? '';
     if (this.initial) {
       this.form.patchValue({
-        effectiveDate: new Date(`${this.initial.effectiveDate}T00:00:00`),
+        effectiveDate: this.initial.effectiveDate,
         amount: this.initial.amount,
         accountId: this.initial.account.id,
         categoryId: this.initial.category.id,
@@ -265,7 +229,7 @@ export class ExpenseFormComponent implements OnChanges {
       this.form.controls.changeReason.setValidators([Validators.required]);
     } else {
       this.form.patchValue({
-        effectiveDate: new Date(),
+        effectiveDate: this.toIsoDate(new Date())!,
         amount: '',
         accountId: firstAccount,
         categoryId: '',
@@ -278,7 +242,7 @@ export class ExpenseFormComponent implements OnChanges {
     this.form.controls.changeReason.updateValueAndValidity({ emitEvent: false });
   }
 
-  private toIsoDate(value: Date | null): string | null {
+  private toIsoDate(value: Date): string | null {
     if (!value) {
       return null;
     }

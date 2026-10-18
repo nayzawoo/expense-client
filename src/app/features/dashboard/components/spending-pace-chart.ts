@@ -40,14 +40,14 @@ import { PacePoint } from '../data/dashboard.models';
         >
           <polyline
             fill="none"
-            stroke="var(--p-surface-300)"
+            stroke="var(--chart-muted)"
             stroke-width="0.3"
             stroke-dasharray="1 1"
             [attr.points]="previousPoints()"
           />
           <polyline
             fill="none"
-            stroke="var(--p-primary-500)"
+            stroke="var(--chart-primary)"
             stroke-width="0.6"
             [attr.points]="currentPoints()"
           />

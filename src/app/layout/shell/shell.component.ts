@@ -1,9 +1,9 @@
 import { Component, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
-import { Button } from 'primeng/button';
 import { AuthService } from '../../core/auth/auth.service';
 import { LanguageSwitcherComponent } from '../../shared/components/language-switcher/language-switcher.component';
+import { UiButtonComponent } from '../../shared/ui/ui-button.component';
 
 @Component({
   selector: 'app-shell',
@@ -13,7 +13,7 @@ import { LanguageSwitcherComponent } from '../../shared/components/language-swit
     RouterLink,
     RouterLinkActive,
     TranslatePipe,
-    Button,
+    UiButtonComponent,
     LanguageSwitcherComponent,
   ],
   templateUrl: './shell.component.html',

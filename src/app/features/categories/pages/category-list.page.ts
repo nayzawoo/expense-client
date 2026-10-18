@@ -2,15 +2,13 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { Button } from 'primeng/button';
-import { Message } from 'primeng/message';
-import { SelectButton } from 'primeng/selectbutton';
-import { Skeleton } from 'primeng/skeleton';
-import { TableModule } from 'primeng/table';
-import { Tag } from 'primeng/tag';
-import { Tooltip } from 'primeng/tooltip';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../../core';
+import { IconComponent } from '../../../shared/icons/icon.component';
+import { UiAlertComponent } from '../../../shared/ui/ui-alert.component';
+import { UiBadgeComponent } from '../../../shared/ui/ui-badge.component';
+import { UiButtonComponent } from '../../../shared/ui/ui-button.component';
+import { UiSkeletonComponent } from '../../../shared/ui/ui-skeleton.component';
 import { CategoryApi } from '../data/category.api';
 import { Category, CategoryStatus } from '../data/category.models';
 
@@ -21,13 +19,11 @@ import { Category, CategoryStatus } from '../data/category.models';
     FormsModule,
     RouterLink,
     TranslatePipe,
-    TableModule,
-    Button,
-    Tag,
-    Skeleton,
-    Message,
-    SelectButton,
-    Tooltip,
+    IconComponent,
+    UiButtonComponent,
+    UiBadgeComponent,
+    UiSkeletonComponent,
+    UiAlertComponent,
   ],
   template: `
     <div class="flex flex-col gap-4 p-4 md:gap-6 md:p-6">
@@ -45,33 +41,40 @@ import { Category, CategoryStatus } from '../data/category.models';
             routerLink="new"
             class="inline-flex items-center gap-2 rounded-lg bg-primary-500 px-4 py-2 text-sm font-semibold text-primary-contrast no-underline hover:bg-primary-600"
           >
-            <i class="pi pi-plus text-sm"></i>
+            <app-icon name="plus" />
             {{ 'categories.add' | translate }}
           </a>
         }
       </header>
 
       @if (!isAdmin()) {
-        <p-message severity="info" styleClass="w-full">{{ 'categories.readOnly' | translate }}</p-message>
+        <app-ui-alert severity="info">{{ 'categories.readOnly' | translate }}</app-ui-alert>
       }
 
-      <p-selectbutton
-        [options]="filterOptions()"
-        [(ngModel)]="statusFilter"
-        (ngModelChange)="reload()"
-        optionLabel="label"
-        optionValue="value"
-        [allowEmpty]="false"
-      />
+      <div class="inline-flex flex-wrap gap-1 rounded-lg border border-surface-200 bg-surface-0 p-1" role="group">
+        @for (opt of filterOptions(); track opt.value) {
+          <button
+            type="button"
+            class="rounded-md px-3 py-1.5 text-sm font-semibold transition-colors"
+            [class.bg-teal-700]="statusFilter === opt.value"
+            [class.text-white]="statusFilter === opt.value"
+            [class.text-surface-600]="statusFilter !== opt.value"
+            [attr.aria-pressed]="statusFilter === opt.value"
+            (click)="setFilter(opt.value)"
+          >
+            {{ opt.label }}
+          </button>
+        }
+      </div>
 
       @if (loading()) {
         <div class="flex flex-col gap-3">
-          <p-skeleton height="2.5rem" />
-          <p-skeleton height="2.5rem" />
-          <p-skeleton height="2.5rem" />
+          <app-ui-skeleton height="2.5rem" />
+          <app-ui-skeleton height="2.5rem" />
+          <app-ui-skeleton height="2.5rem" />
         </div>
       } @else if (error()) {
-        <p-message severity="error" styleClass="w-full">{{ error() }}</p-message>
+        <app-ui-alert severity="error">{{ error() }}</app-ui-alert>
       } @else {
         <div class="flex flex-col gap-3 md:hidden">
           @if (rows().length === 0) {
@@ -93,7 +96,7 @@ import { Category, CategoryStatus } from '../data/category.models';
                 <p class="truncate font-medium text-surface-900">{{ c.name }}</p>
                 <p class="text-xs text-surface-500">{{ c.iconKey }} · #{{ c.sortOrder }}</p>
               </div>
-              <p-tag
+              <app-ui-badge
                 [value]="c.status"
                 [severity]="c.status === 'ACTIVE' ? 'success' : 'secondary'"
               />
@@ -102,20 +105,25 @@ import { Category, CategoryStatus } from '../data/category.models';
                   <a
                     [routerLink]="[c.id, 'edit']"
                     class="inline-flex h-9 w-9 items-center justify-center rounded-md border border-surface-200 text-surface-600 no-underline"
+                    [attr.aria-label]="'categories.editTitle' | translate"
                   >
-                    <i class="pi pi-pencil text-sm"></i>
+                    <app-icon name="pencil" />
                   </a>
-                  <p-button
-                    [icon]="c.status === 'ACTIVE' ? 'pi pi-inbox' : 'pi pi-refresh'"
-                    [rounded]="true"
-                    [text]="true"
-                    severity="secondary"
-                    (onClick)="toggleStatus(c)"
-                    [pTooltip]="
+                  <app-ui-button
+                    variant="ghost"
+                    size="sm"
+                    [title]="
                       (c.status === 'ACTIVE' ? 'categories.archive' : 'categories.restore')
                         | translate
                     "
-                  />
+                    [ariaLabel]="
+                      (c.status === 'ACTIVE' ? 'categories.archive' : 'categories.restore')
+                        | translate
+                    "
+                    (clicked)="toggleStatus(c)"
+                  >
+                    <app-icon [name]="c.status === 'ACTIVE' ? 'archive' : 'restore'" />
+                  </app-ui-button>
                 </div>
               }
             </article>
@@ -123,71 +131,78 @@ import { Category, CategoryStatus } from '../data/category.models';
         </div>
 
         <div class="hidden overflow-hidden rounded-xl border border-surface-200 bg-surface-0 md:block">
-          <p-table [value]="rows()" [tableStyle]="{ 'min-width': '40rem' }">
-            <ng-template #header>
+          <table class="min-w-[40rem] w-full border-collapse text-left text-sm">
+            <thead class="border-b border-surface-200 bg-surface-50 text-xs uppercase tracking-wide text-surface-500">
               <tr>
-                <th style="width: 4rem">#</th>
-                <th>{{ 'categories.name' | translate }}</th>
-                <th class="text-center">{{ 'categories.color' | translate }}</th>
-                <th>{{ 'categories.icon' | translate }}</th>
-                <th>{{ 'categories.status' | translate }}</th>
-                <th class="text-right">{{ 'categories.actions' | translate }}</th>
+                <th class="px-4 py-3 font-semibold" style="width: 4rem">#</th>
+                <th class="px-4 py-3 font-semibold">{{ 'categories.name' | translate }}</th>
+                <th class="px-4 py-3 text-center font-semibold">{{ 'categories.color' | translate }}</th>
+                <th class="px-4 py-3 font-semibold">{{ 'categories.icon' | translate }}</th>
+                <th class="px-4 py-3 font-semibold">{{ 'categories.status' | translate }}</th>
+                <th class="px-4 py-3 text-right font-semibold">{{ 'categories.actions' | translate }}</th>
               </tr>
-            </ng-template>
-            <ng-template #body let-c>
-              <tr>
-                <td class="font-mono text-xs text-surface-500">{{ c.sortOrder }}</td>
-                <td class="font-medium">{{ c.name }}</td>
-                <td>
-                  <div class="flex justify-center">
-                    <span
-                      class="flex h-8 w-8 items-center justify-center rounded-lg border border-surface-200"
-                      [style.color]="c.color"
-                      [title]="c.color"
-                      >●</span
-                    >
-                  </div>
-                </td>
-                <td class="font-mono text-xs text-surface-500">{{ c.iconKey }}</td>
-                <td>
-                  <p-tag
-                    [value]="c.status"
-                    [severity]="c.status === 'ACTIVE' ? 'success' : 'secondary'"
-                  />
-                </td>
-                <td class="text-right">
-                  @if (isAdmin()) {
-                    <div class="inline-flex gap-1">
-                      <a
-                        [routerLink]="[c.id, 'edit']"
-                        class="inline-flex h-9 w-9 items-center justify-center rounded-md text-surface-600 no-underline hover:bg-surface-100"
+            </thead>
+            <tbody>
+              @if (rows().length === 0) {
+                <tr>
+                  <td colspan="6" class="px-4 py-8 text-center text-surface-500">
+                    {{ 'categories.empty' | translate }}
+                  </td>
+                </tr>
+              }
+              @for (c of rows(); track c.id) {
+                <tr class="border-b border-surface-100 last:border-0">
+                  <td class="px-4 py-3 font-mono text-xs text-surface-500">{{ c.sortOrder }}</td>
+                  <td class="px-4 py-3 font-medium">{{ c.name }}</td>
+                  <td class="px-4 py-3">
+                    <div class="flex justify-center">
+                      <span
+                        class="flex h-8 w-8 items-center justify-center rounded-lg border border-surface-200"
+                        [style.color]="c.color"
+                        [title]="c.color"
+                        >●</span
                       >
-                        <i class="pi pi-pencil text-sm"></i>
-                      </a>
-                      <p-button
-                        [icon]="c.status === 'ACTIVE' ? 'pi pi-inbox' : 'pi pi-refresh'"
-                        [rounded]="true"
-                        [text]="true"
-                        severity="secondary"
-                        (onClick)="toggleStatus(c)"
-                        [pTooltip]="
-                          (c.status === 'ACTIVE' ? 'categories.archive' : 'categories.restore')
-                            | translate
-                        "
-                      />
                     </div>
-                  }
-                </td>
-              </tr>
-            </ng-template>
-            <ng-template #emptymessage>
-              <tr>
-                <td colspan="6" class="py-8 text-center text-surface-500">
-                  {{ 'categories.empty' | translate }}
-                </td>
-              </tr>
-            </ng-template>
-          </p-table>
+                  </td>
+                  <td class="px-4 py-3 font-mono text-xs text-surface-500">{{ c.iconKey }}</td>
+                  <td class="px-4 py-3">
+                    <app-ui-badge
+                      [value]="c.status"
+                      [severity]="c.status === 'ACTIVE' ? 'success' : 'secondary'"
+                    />
+                  </td>
+                  <td class="px-4 py-3 text-right">
+                    @if (isAdmin()) {
+                      <div class="inline-flex gap-1">
+                        <a
+                          [routerLink]="[c.id, 'edit']"
+                          class="inline-flex h-9 w-9 items-center justify-center rounded-md text-surface-600 no-underline hover:bg-surface-100"
+                          [attr.aria-label]="'categories.editTitle' | translate"
+                        >
+                          <app-icon name="pencil" />
+                        </a>
+                        <app-ui-button
+                          variant="ghost"
+                          size="sm"
+                          [title]="
+                            (c.status === 'ACTIVE' ? 'categories.archive' : 'categories.restore')
+                              | translate
+                          "
+                          [ariaLabel]="
+                            (c.status === 'ACTIVE' ? 'categories.archive' : 'categories.restore')
+                              | translate
+                          "
+                          (clicked)="toggleStatus(c)"
+                        >
+                          <app-icon [name]="c.status === 'ACTIVE' ? 'archive' : 'restore'" />
+                        </app-ui-button>
+                      </div>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
         </div>
       }
     </div>
@@ -213,6 +228,11 @@ export class CategoryListPage implements OnInit {
 
   ngOnInit(): void {
     void this.ensureHouseholdThenReload();
+  }
+
+  setFilter(value: CategoryStatus | 'ALL'): void {
+    this.statusFilter = value;
+    void this.reload();
   }
 
   async ensureHouseholdThenReload(): Promise<void> {

@@ -22,7 +22,9 @@
     "newPassword": "စကားဝှက်အသစ်",
     "confirmPassword": "စကားဝှက် အတည်ပြုရန်",
     "savePassword": "စကားဝှက် သိမ်းမည်",
-    "placeholderNote": "စကားဝှက်ပြောင်း UI ကို session API နှင့် ချိတ်ဆက်ထားပြီး နောက်အဆင့်တွင် ပြီးစီးမည်။"
+    "placeholderNote": "စကားဝှက်ပြောင်း UI ကို session API နှင့် ချိတ်ဆက်ထားပြီး နောက်အဆင့်တွင် ပြီးစီးမည်။",
+    "showPassword": "ပြရန်",
+    "hidePassword": "ဖျောက်ရန်"
   },
   "placeholder": {
     "title": "မကြာမီ ရောက်ရှိမည်",

@@ -2,13 +2,12 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { Button } from 'primeng/button';
-import { InputNumber } from 'primeng/inputnumber';
-import { InputText } from 'primeng/inputtext';
-import { Message } from 'primeng/message';
-import { Skeleton } from 'primeng/skeleton';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../../core';
+import { IconComponent } from '../../../shared/icons/icon.component';
+import { UiAlertComponent } from '../../../shared/ui/ui-alert.component';
+import { UiButtonComponent } from '../../../shared/ui/ui-button.component';
+import { UiSkeletonComponent } from '../../../shared/ui/ui-skeleton.component';
 import { CategoryApi } from '../data/category.api';
 import { Category } from '../data/category.models';
 
@@ -19,11 +18,10 @@ import { Category } from '../data/category.models';
     ReactiveFormsModule,
     RouterLink,
     TranslatePipe,
-    Button,
-    InputText,
-    InputNumber,
-    Message,
-    Skeleton,
+    IconComponent,
+    UiButtonComponent,
+    UiAlertComponent,
+    UiSkeletonComponent,
   ],
   template: `
     <div class="flex flex-col gap-4 p-4 md:gap-6 md:p-6">
@@ -33,7 +31,7 @@ import { Category } from '../data/category.models';
           class="inline-flex h-9 w-9 items-center justify-center rounded-md border border-surface-200 text-surface-600 no-underline"
           [attr.aria-label]="'categories.back' | translate"
         >
-          <i class="pi pi-arrow-left text-sm"></i>
+          <app-icon name="arrow-left" />
         </a>
         <div>
           <h1 class="text-xl font-semibold text-surface-900 md:text-2xl">
@@ -46,9 +44,9 @@ import { Category } from '../data/category.models';
       </header>
 
       @if (!isAdmin()) {
-        <p-message severity="warn" styleClass="w-full">{{ 'categories.readOnly' | translate }}</p-message>
+        <app-ui-alert severity="warn">{{ 'categories.readOnly' | translate }}</app-ui-alert>
       } @else if (loading()) {
-        <p-skeleton height="16rem" styleClass="max-w-lg" />
+        <app-ui-skeleton height="16rem" width="100%" />
       } @else {
         <form
           class="mx-auto flex w-full max-w-lg flex-col gap-4 rounded-xl border border-surface-200 bg-surface-0 p-5"
@@ -56,7 +54,7 @@ import { Category } from '../data/category.models';
           (ngSubmit)="submit()"
         >
           @if (error()) {
-            <p-message severity="error" styleClass="w-full">{{ error() }}</p-message>
+            <app-ui-alert severity="error">{{ error() }}</app-ui-alert>
           }
 
           <div class="flex flex-col gap-1.5">
@@ -65,9 +63,8 @@ import { Category } from '../data/category.models';
             </label>
             <input
               id="category-name"
-              pInputText
+              class="ui-input"
               formControlName="name"
-              class="w-full"
               autocomplete="off"
             />
             @if (form.controls.name.touched && form.controls.name.invalid) {
@@ -94,11 +91,11 @@ import { Category } from '../data/category.models';
             <label for="category-sort" class="text-sm font-medium text-surface-800">
               {{ 'categories.sort' | translate }}
             </label>
-            <p-inputnumber
-              inputId="category-sort"
+            <input
+              id="category-sort"
+              class="ui-input"
+              type="number"
               formControlName="sortOrder"
-              [showButtons]="true"
-              styleClass="w-full"
             />
           </div>
 
@@ -109,9 +106,8 @@ import { Category } from '../data/category.models';
             <div class="flex items-center gap-3">
               <input
                 id="category-icon"
-                pInputText
+                class="ui-input"
                 formControlName="iconKey"
-                class="w-full"
                 autocomplete="off"
               />
               <span
@@ -125,16 +121,13 @@ import { Category } from '../data/category.models';
             <p class="text-[10px] text-surface-500">{{ 'categories.iconHint' | translate }}</p>
           </div>
 
-          <p-button
-            type="submit"
-            styleClass="w-full"
-            [disabled]="saving() || form.invalid"
-            [label]="
+          <app-ui-button type="submit" [block]="true" [disabled]="saving() || form.invalid" [loading]="saving()">
+            {{
               saving()
                 ? ('categories.saving' | translate)
                 : ((isEdit() ? 'categories.save' : 'categories.create') | translate)
-            "
-          />
+            }}
+          </app-ui-button>
         </form>
       }
     </div>
