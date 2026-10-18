@@ -16,6 +16,12 @@
       </app-ui-alert>
     }
 
+    @if (emailChanged()) {
+      <app-ui-alert severity="success" class="mb-4 block">
+        {{ 'auth.emailChanged' | translate }}
+      </app-ui-alert>
+    }
+
     @if (error()) {
       <app-ui-alert severity="error" class="mb-4 block">{{ 'auth.failed' | translate }}</app-ui-alert>
     }
