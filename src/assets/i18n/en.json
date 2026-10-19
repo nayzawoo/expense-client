@@ -11,6 +11,7 @@
     "categories": "Categories",
     "beneficiaries": "Beneficiaries",
     "accounts": "Accounts",
+    "profile": "Profile",
     "logout": "Sign out",
     "language": "Language"
   },
@@ -31,6 +32,7 @@
     "currentPasswordWrong": "Current password is incorrect.",
     "changePasswordFailed": "Could not change password. Try again.",
     "passwordChanged": "Password updated. Sign in with your new password.",
+    "emailChanged": "Email updated. Sign in with your new email.",
     "showPassword": "Show",
     "hidePassword": "Hide"
   },

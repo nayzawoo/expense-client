@@ -55,6 +55,13 @@
           >
             {{ 'nav.accounts' | translate }}
           </a>
+          <a
+            routerLink="/profile"
+            routerLinkActive="bg-primary/10 text-primary"
+            class="rounded-md px-3 py-2 text-sm font-medium text-surface-700 hover:bg-surface-100"
+          >
+            {{ 'nav.profile' | translate }}
+          </a>
         </nav>
       </div>
 
@@ -63,7 +70,13 @@
           <span class="hidden text-sm text-surface-500 md:inline">{{ hh.name }}</span>
         }
         @if (user(); as u) {
-          <span class="hidden max-w-40 truncate text-sm text-surface-600 lg:inline">{{ u.displayName }}</span>
+          <a
+            routerLink="/profile"
+            class="hidden max-w-40 truncate text-sm text-surface-600 no-underline hover:text-primary lg:inline"
+            [attr.title]="'nav.profile' | translate"
+          >
+            {{ u.displayName }}
+          </a>
         }
         <app-language-switcher />
         <app-ui-button variant="secondary" size="sm" (clicked)="logout()">
@@ -121,6 +134,13 @@
         class="whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium text-surface-700"
       >
         {{ 'nav.accounts' | translate }}
+      </a>
+      <a
+        routerLink="/profile"
+        routerLinkActive="bg-primary/10 text-primary"
+        class="whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium text-surface-700"
+      >
+        {{ 'nav.profile' | translate }}
       </a>
     </nav>
   </header>
