@@ -78,6 +78,12 @@ import { Account } from '../data/account.models';
               <p class="mt-1 text-xs text-surface-500">
                 {{ 'accounts.asOf' | translate }} {{ a.balanceAsOf }}
               </p>
+              <a
+                [routerLink]="[a.id, 'ledger']"
+                class="mt-3 inline-flex text-sm font-semibold text-primary-600 no-underline hover:underline"
+              >
+                {{ 'accounts.ledger' | translate }}
+              </a>
             </article>
           }
         </div>
@@ -93,6 +99,7 @@ import { Account } from '../data/account.models';
                 <th class="px-4 py-3 font-semibold">{{ 'accounts.owner' | translate }}</th>
                 <th class="px-4 py-3 text-right font-semibold">{{ 'accounts.balance' | translate }}</th>
                 <th class="px-4 py-3 font-semibold">{{ 'accounts.status' | translate }}</th>
+                <th class="px-4 py-3 font-semibold">{{ 'accounts.actions' | translate }}</th>
               </tr>
             </thead>
             <tbody>
@@ -122,6 +129,14 @@ import { Account } from '../data/account.models';
                       [value]="a.status"
                       [severity]="a.status === 'ACTIVE' ? 'success' : 'secondary'"
                     />
+                  </td>
+                  <td class="px-4 py-3">
+                    <a
+                      [routerLink]="[a.id, 'ledger']"
+                      class="text-sm font-semibold text-primary-600 no-underline hover:underline"
+                    >
+                      {{ 'accounts.ledger' | translate }}
+                    </a>
                   </td>
                 </tr>
               }
