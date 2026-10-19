@@ -41,6 +41,7 @@ export class ShellComponent {
     { path: '/expenses', labelKey: 'nav.expenses', icon: 'wallet' },
     { path: '/incomes', labelKey: 'nav.incomes', icon: 'banknote' },
     { path: '/transfers', labelKey: 'nav.transfers', icon: 'transfer' },
+    { path: '/adjustments', labelKey: 'nav.adjustments', icon: 'scale' },
     { path: '/categories', labelKey: 'nav.categories', icon: 'tags' },
     { path: '/beneficiaries', labelKey: 'nav.beneficiaries', icon: 'users' },
     { path: '/accounts', labelKey: 'nav.accounts', icon: 'landmark' },

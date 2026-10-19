@@ -16,6 +16,7 @@ export type AppIconName =
   | 'wallet'
   | 'banknote'
   | 'transfer'
+  | 'scale'
   | 'tags'
   | 'users'
   | 'user-cog'
@@ -39,6 +40,7 @@ const NAME_MAP: Record<Exclude<AppIconName, 'category'>, string> = {
   wallet: 'wallet',
   banknote: 'banknote',
   transfer: 'arrow-left-right',
+  scale: 'scale',
   tags: 'tags',
   users: 'users',
   'user-cog': 'user-cog',
