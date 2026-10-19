@@ -32,6 +32,11 @@ export const routes: Routes = [
           import('./features/transfers/transfers.routes').then((m) => m.TRANSFERS_ROUTES),
       },
       {
+        path: 'adjustments',
+        loadChildren: () =>
+          import('./features/adjustments/adjustments.routes').then((m) => m.ADJUSTMENTS_ROUTES),
+      },
+      {
         path: 'categories',
         loadChildren: () =>
           import('./features/categories/categories.routes').then((m) => m.CATEGORIES_ROUTES),
