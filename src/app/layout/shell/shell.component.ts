@@ -44,6 +44,7 @@ export class ShellComponent {
     { path: '/categories', labelKey: 'nav.categories', icon: 'tags' },
     { path: '/beneficiaries', labelKey: 'nav.beneficiaries', icon: 'users' },
     { path: '/accounts', labelKey: 'nav.accounts', icon: 'landmark' },
+    { path: '/users', labelKey: 'nav.users', icon: 'user-cog' },
     { path: '/profile', labelKey: 'nav.profile', icon: 'user' },
   ];
 
