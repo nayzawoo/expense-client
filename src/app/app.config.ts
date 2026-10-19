@@ -17,6 +17,7 @@ import {
   csrfInterceptor,
   provideI18n,
 } from './core';
+import { provideAppLucideIcons } from './shared/icons/lucide-icons';
 
 function bootstrapApp(): () => Promise<unknown> {
   return () => {
@@ -32,6 +33,7 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
     provideHttpClient(withInterceptors([credentialsInterceptor, csrfInterceptor])),
+    provideAppLucideIcons(),
     provideI18n(),
     {
       provide: APP_INITIALIZER,

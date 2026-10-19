@@ -87,11 +87,12 @@ import { Category, CategoryStatus } from '../data/category.models';
               class="flex items-center gap-3 rounded-xl border border-surface-200 bg-surface-0 p-3"
             >
               <span
-                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-sm font-semibold"
+                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg"
                 [style.background]="c.color + '22'"
                 [style.color]="c.color"
-                >{{ c.name.slice(0, 1) }}</span
               >
+                <app-icon name="category" [categoryKey]="c.iconKey" sizeClass="h-5 w-5" [size]="20" />
+              </span>
               <div class="min-w-0 flex-1">
                 <p class="truncate font-medium text-surface-900">{{ c.name }}</p>
                 <p class="text-xs text-surface-500">{{ c.iconKey }} · #{{ c.sortOrder }}</p>
@@ -164,7 +165,12 @@ import { Category, CategoryStatus } from '../data/category.models';
                       >
                     </div>
                   </td>
-                  <td class="px-4 py-3 font-mono text-xs text-surface-500">{{ c.iconKey }}</td>
+                  <td class="px-4 py-3">
+                    <span class="inline-flex items-center gap-2 text-surface-700">
+                      <app-icon name="category" [categoryKey]="c.iconKey" />
+                      <span class="font-mono text-xs text-surface-500">{{ c.iconKey }}</span>
+                    </span>
+                  </td>
                   <td class="px-4 py-3">
                     <app-ui-badge
                       [value]="c.status"

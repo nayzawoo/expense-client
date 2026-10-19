@@ -1,5 +1,4 @@
-import { InjectionToken, inject } from '@angular/core';
-import { TranslateService } from '@ngx-translate/core';
+import { provideFeatureI18n } from '../../../core/i18n/feature-i18n';
 
 const EN = {
   accounts: {
@@ -20,15 +19,21 @@ const EN = {
     actions: 'Actions',
     createTitle: 'Create account',
     createSubtitle: 'Opening balance is immutable after create',
+    editTitle: 'Edit account',
+    editSubtitle: 'Update name, owner, type, or sort order. Opening balance cannot change.',
+    edit: 'Edit',
     create: 'Create',
+    save: 'Save',
     saving: 'Saving…',
     back: 'Back',
-    readOnly: 'Members can view accounts. Only admins can create them.',
+    readOnly: 'Members can view accounts. Only admins can create or edit them.',
     nameRequired: 'Name is required',
     ownerRequired: 'Owner label is required',
     amountRequired: 'Opening amount is required (whole MMK string)',
     amountInvalid: 'Use a whole-number money string, for example 0 or 1000',
-    saveError: 'Could not create account',
+    openingImmutable: 'Opening amount and date are set at create and cannot be changed.',
+    saveError: 'Could not save account',
+    updateSuccess: 'Account updated',
     negativeWarn: 'Negative balance',
     typeBank: 'Bank',
     typeWallet: 'Wallet',
@@ -76,15 +81,21 @@ const MY = {
     actions: 'လုပ်ဆောင်ချက်',
     createTitle: 'အကောင့် အသစ်',
     createSubtitle: 'အစ လက်ကျန်ကို ဖန်တီးပြီးနောက် ပြင်၍မရပါ',
+    editTitle: 'အကောင့် ပြင်ရန်',
+    editSubtitle: 'အမည်၊ ပိုင်ရှင်၊ အမျိုးအစား သို့မဟုတ် အစဉ် ပြင်ရန်။ အစ လက်ကျန် ပြင်၍မရပါ။',
+    edit: 'ပြင်ရန်',
     create: 'ဖန်တီးရန်',
+    save: 'သိမ်းရန်',
     saving: 'သိမ်းနေသည်…',
     back: 'နောက်သို့',
-    readOnly: 'အဖွဲ့ဝင်များ ကြည့်နိုင်သည်။ ဖန်တီးရန် admin လိုအပ်သည်။',
+    readOnly: 'အဖွဲ့ဝင်များ ကြည့်နိုင်သည်။ ဖန်တီး/ပြင်ရန် admin လိုအပ်သည်။',
     nameRequired: 'အမည် လိုအပ်သည်',
     ownerRequired: 'ပိုင်ရှင် အညွှန်း လိုအပ်သည်',
     amountRequired: 'အစ လက်ကျန် လိုအပ်သည် (MMK ကိန်းပြည့်)',
     amountInvalid: 'ကိန်းပြည့် ငွေစာကြောင်း သုံးပါ (ဥပမာ 0 သို့ 1000)',
-    saveError: 'အကောင့် ဖန်တီးမရပါ',
+    openingImmutable: 'အစ လက်ကျန်နှင့် ဖွင့်သည့်နေ့ကို ဖန်တီးစဉ် သတ်မှတ်ပြီး ပြင်၍မရပါ။',
+    saveError: 'အကောင့် သိမ်းမရပါ',
+    updateSuccess: 'အကောင့် ပြင်ပြီးပါပြီ',
     negativeWarn: 'အနုတ် လက်ကျန်',
     typeBank: 'ဘဏ်',
     typeWallet: 'ပိုက်ဆံအိတ်',
@@ -113,16 +124,6 @@ const MY = {
   },
 };
 
-export const ACCOUNTS_I18N = new InjectionToken<boolean>('ACCOUNTS_I18N');
-
 export function provideAccountsI18n() {
-  return {
-    provide: ACCOUNTS_I18N,
-    useFactory: () => {
-      const translate = inject(TranslateService);
-      translate.setTranslation('en', EN, true);
-      translate.setTranslation('my', MY, true);
-      return true;
-    },
-  };
+  return provideFeatureI18n(EN, MY);
 }

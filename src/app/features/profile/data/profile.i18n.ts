@@ -1,5 +1,4 @@
-import { InjectionToken, inject } from '@angular/core';
-import { TranslateService } from '@ngx-translate/core';
+import { provideFeatureI18n } from '../../../core/i18n/feature-i18n';
 
 const EN = {
   profile: {
@@ -59,16 +58,6 @@ const MY = {
   },
 };
 
-export const PROFILE_I18N = new InjectionToken<boolean>('PROFILE_I18N');
-
 export function provideProfileI18n() {
-  return {
-    provide: PROFILE_I18N,
-    useFactory: () => {
-      const translate = inject(TranslateService);
-      translate.setTranslation('en', EN, true);
-      translate.setTranslation('my', MY, true);
-      return true;
-    },
-  };
+  return provideFeatureI18n(EN, MY);
 }

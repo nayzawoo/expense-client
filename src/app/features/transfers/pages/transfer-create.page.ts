@@ -187,6 +187,7 @@ export class TransferCreatePage implements OnInit {
           this.success.set(this.label('createSuccess'));
           this.form.patchValue({ amount: '', note: '' });
           this.form.markAsPristine();
+          this.form.markAsUntouched();
         },
         error: (err: { status?: number; error?: { message?: string; detail?: string } }) => {
           this.saving.set(false);

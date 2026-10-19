@@ -1,5 +1,4 @@
-import { InjectionToken, inject } from '@angular/core';
-import { TranslateService } from '@ngx-translate/core';
+import { provideFeatureI18n } from '../../../core/i18n/feature-i18n';
 
 const EN = {
   categories: {
@@ -77,17 +76,6 @@ const MY = {
   },
 };
 
-export const CATEGORIES_I18N = new InjectionToken<boolean>('CATEGORIES_I18N');
-
-/** Merge feature strings into ngx-translate without editing scaffold asset files. */
 export function provideCategoriesI18n() {
-  return {
-    provide: CATEGORIES_I18N,
-    useFactory: () => {
-      const translate = inject(TranslateService);
-      translate.setTranslation('en', EN, true);
-      translate.setTranslation('my', MY, true);
-      return true;
-    },
-  };
+  return provideFeatureI18n(EN, MY);
 }
