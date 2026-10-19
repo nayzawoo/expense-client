@@ -3,7 +3,13 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { AuthService, apiV1 } from '../../../core';
 import { createIdempotencyKey } from '../../../shared';
-import { Account, CreateAccountRequest, LedgerQuery, LedgerResponse } from './account.models';
+import {
+  Account,
+  CreateAccountRequest,
+  LedgerQuery,
+  LedgerResponse,
+  UpdateAccountRequest,
+} from './account.models';
 
 @Injectable()
 export class AccountApi {
@@ -51,5 +57,9 @@ export class AccountApi {
     return this.http.post<Account>(this.base(), body, {
       headers: new HttpHeaders({ 'Idempotency-Key': createIdempotencyKey() }),
     });
+  }
+
+  update(accountId: string, body: UpdateAccountRequest): Observable<Account> {
+    return this.http.put<Account>(`${this.base()}/${accountId}`, body);
   }
 }

@@ -203,6 +203,7 @@ export class ExpenseFormComponent implements OnChanges {
         if (!this.initial) {
           this.form.patchValue({ amount: '', note: '' });
           this.form.markAsPristine();
+          this.form.markAsUntouched();
         }
         this.saved.emit(expense);
       },

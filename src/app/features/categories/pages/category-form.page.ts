@@ -104,18 +104,22 @@ import { Category } from '../data/category.models';
               {{ 'categories.icon' | translate }}
             </label>
             <div class="flex items-center gap-3">
-              <input
-                id="category-icon"
-                class="ui-input"
-                formControlName="iconKey"
-                autocomplete="off"
-              />
+              <select id="category-icon" class="ui-input" formControlName="iconKey">
+                @for (key of iconKeys; track key) {
+                  <option [value]="key">{{ key }}</option>
+                }
+              </select>
               <span
-                class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-surface-200 text-sm font-semibold"
+                class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-surface-200"
                 [style.color]="form.controls.color.value"
                 [style.background]="form.controls.color.value + '22'"
               >
-                {{ (form.controls.name.value || '?').slice(0, 1) }}
+                <app-icon
+                  name="category"
+                  [categoryKey]="form.controls.iconKey.value"
+                  sizeClass="h-5 w-5"
+                  [size]="20"
+                />
               </span>
             </div>
             <p class="text-[10px] text-surface-500">{{ 'categories.iconHint' | translate }}</p>
@@ -147,6 +151,17 @@ export class CategoryFormPage implements OnInit {
   readonly categoryId = signal<string | null>(null);
   readonly isEdit = computed(() => this.categoryId() !== null);
   readonly isAdmin = computed(() => this.auth.user()?.role === 'ADMIN');
+  readonly iconKeys = [
+    'food',
+    'transport',
+    'home',
+    'health',
+    'shopping',
+    'bills',
+    'education',
+    'entertainment',
+    'other',
+  ] as const;
 
   readonly form = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.maxLength(120)]],

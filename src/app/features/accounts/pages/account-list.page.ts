@@ -78,12 +78,24 @@ import { Account } from '../data/account.models';
               <p class="mt-1 text-xs text-surface-500">
                 {{ 'accounts.asOf' | translate }} {{ a.balanceAsOf }}
               </p>
-              <a
-                [routerLink]="[a.id, 'ledger']"
-                class="mt-3 inline-flex text-sm font-semibold text-primary-600 no-underline hover:underline"
-              >
-                {{ 'accounts.ledger' | translate }}
-              </a>
+              <div class="mt-3 flex flex-wrap items-center gap-3">
+                <a
+                  [routerLink]="[a.id, 'ledger']"
+                  class="inline-flex text-sm font-semibold text-primary-600 no-underline hover:underline"
+                >
+                  {{ 'accounts.ledger' | translate }}
+                </a>
+                @if (isAdmin()) {
+                  <a
+                    [routerLink]="[a.id, 'edit']"
+                    class="inline-flex items-center gap-1 text-sm font-semibold text-surface-700 no-underline hover:text-primary"
+                    [attr.aria-label]="'accounts.edit' | translate"
+                  >
+                    <app-icon name="pencil" />
+                    {{ 'accounts.edit' | translate }}
+                  </a>
+                }
+              </div>
             </article>
           }
         </div>
@@ -131,12 +143,23 @@ import { Account } from '../data/account.models';
                     />
                   </td>
                   <td class="px-4 py-3">
-                    <a
-                      [routerLink]="[a.id, 'ledger']"
-                      class="text-sm font-semibold text-primary-600 no-underline hover:underline"
-                    >
-                      {{ 'accounts.ledger' | translate }}
-                    </a>
+                    <div class="flex flex-wrap items-center gap-2">
+                      <a
+                        [routerLink]="[a.id, 'ledger']"
+                        class="text-sm font-semibold text-primary-600 no-underline hover:underline"
+                      >
+                        {{ 'accounts.ledger' | translate }}
+                      </a>
+                      @if (isAdmin()) {
+                        <a
+                          [routerLink]="[a.id, 'edit']"
+                          class="inline-flex h-9 w-9 items-center justify-center rounded-md text-surface-600 no-underline hover:bg-surface-100"
+                          [attr.aria-label]="'accounts.edit' | translate"
+                        >
+                          <app-icon name="pencil" />
+                        </a>
+                      }
+                    </div>
                   </td>
                 </tr>
               }

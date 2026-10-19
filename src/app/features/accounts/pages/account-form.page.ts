@@ -1,12 +1,12 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../../core';
-import { IconComponent, UiAlertComponent, UiButtonComponent } from '../../../shared';
+import { IconComponent, UiAlertComponent, UiButtonComponent, UiSkeletonComponent } from '../../../shared';
 import { AccountApi } from '../data/account.api';
-import { AccountType } from '../data/account.models';
+import { Account, AccountType } from '../data/account.models';
 
 @Component({
   selector: 'app-account-form-page',
@@ -18,6 +18,7 @@ import { AccountType } from '../data/account.models';
     IconComponent,
     UiAlertComponent,
     UiButtonComponent,
+    UiSkeletonComponent,
   ],
   template: `
     <div class="flex flex-col gap-4 p-4 md:gap-6 md:p-6">
@@ -31,14 +32,18 @@ import { AccountType } from '../data/account.models';
         </a>
         <div>
           <h1 class="text-xl font-semibold text-surface-900 md:text-2xl">
-            {{ 'accounts.createTitle' | translate }}
+            {{ (isEdit() ? 'accounts.editTitle' : 'accounts.createTitle') | translate }}
           </h1>
-          <p class="mt-1 text-sm text-surface-600">{{ 'accounts.createSubtitle' | translate }}</p>
+          <p class="mt-1 text-sm text-surface-600">
+            {{ (isEdit() ? 'accounts.editSubtitle' : 'accounts.createSubtitle') | translate }}
+          </p>
         </div>
       </header>
 
       @if (!isAdmin()) {
         <app-ui-alert severity="warn">{{ 'accounts.readOnly' | translate }}</app-ui-alert>
+      } @else if (loading()) {
+        <app-ui-skeleton height="16rem" width="100%" />
       } @else {
         <form
           class="mx-auto flex w-full max-w-lg flex-col gap-4 rounded-xl border border-surface-200 bg-surface-0 p-5"
@@ -80,32 +85,52 @@ import { AccountType } from '../data/account.models';
             }
           </div>
 
-          <div class="flex flex-col gap-1.5">
-            <label for="account-opened" class="text-sm font-medium text-surface-800">
-              {{ 'accounts.openedOn' | translate }}
-            </label>
-            <input id="account-opened" class="ui-input" type="date" formControlName="openedOn" [attr.max]="today" />
-          </div>
+          @if (isEdit()) {
+            <app-ui-alert severity="info">{{ 'accounts.openingImmutable' | translate }}</app-ui-alert>
+            <div class="grid grid-cols-2 gap-3 text-sm">
+              <div>
+                <p class="text-surface-500">{{ 'accounts.openedOn' | translate }}</p>
+                <p class="font-medium text-surface-800">{{ existing()?.openedOn }}</p>
+              </div>
+              <div>
+                <p class="text-surface-500">{{ 'accounts.openingAmount' | translate }}</p>
+                <p class="font-medium tabular-nums text-surface-800">{{ existing()?.openingAmount }}</p>
+              </div>
+            </div>
+          } @else {
+            <div class="flex flex-col gap-1.5">
+              <label for="account-opened" class="text-sm font-medium text-surface-800">
+                {{ 'accounts.openedOn' | translate }}
+              </label>
+              <input
+                id="account-opened"
+                class="ui-input"
+                type="date"
+                formControlName="openedOn"
+                [attr.max]="today"
+              />
+            </div>
 
-          <div class="flex flex-col gap-1.5">
-            <label for="account-opening" class="text-sm font-medium text-surface-800">
-              {{ 'accounts.openingAmount' | translate }}
-            </label>
-            <input
-              id="account-opening"
-              class="ui-input"
-              formControlName="openingAmount"
-              inputmode="numeric"
-              autocomplete="off"
-              placeholder="0"
-            />
-            @if (form.controls.openingAmount.touched && form.controls.openingAmount.errors?.['required']) {
-              <span class="text-xs text-rose-700">{{ 'accounts.amountRequired' | translate }}</span>
-            }
-            @if (form.controls.openingAmount.touched && form.controls.openingAmount.errors?.['pattern']) {
-              <span class="text-xs text-rose-700">{{ 'accounts.amountInvalid' | translate }}</span>
-            }
-          </div>
+            <div class="flex flex-col gap-1.5">
+              <label for="account-opening" class="text-sm font-medium text-surface-800">
+                {{ 'accounts.openingAmount' | translate }}
+              </label>
+              <input
+                id="account-opening"
+                class="ui-input"
+                formControlName="openingAmount"
+                inputmode="numeric"
+                autocomplete="off"
+                placeholder="0"
+              />
+              @if (form.controls.openingAmount.touched && form.controls.openingAmount.errors?.['required']) {
+                <span class="text-xs text-rose-700">{{ 'accounts.amountRequired' | translate }}</span>
+              }
+              @if (form.controls.openingAmount.touched && form.controls.openingAmount.errors?.['pattern']) {
+                <span class="text-xs text-rose-700">{{ 'accounts.amountInvalid' | translate }}</span>
+              }
+            </div>
+          }
 
           <div class="flex flex-col gap-1.5">
             <label for="account-sort" class="text-sm font-medium text-surface-800">
@@ -120,7 +145,11 @@ import { AccountType } from '../data/account.models';
             [loading]="saving()"
             [disabled]="saving() || form.invalid"
           >
-            {{ saving() ? ('accounts.saving' | translate) : ('accounts.create' | translate) }}
+            {{
+              saving()
+                ? ('accounts.saving' | translate)
+                : ((isEdit() ? 'accounts.save' : 'accounts.create') | translate)
+            }}
           </app-ui-button>
         </form>
       }
@@ -131,12 +160,16 @@ export class AccountFormPage implements OnInit {
   private readonly api = inject(AccountApi);
   private readonly auth = inject(AuthService);
   private readonly fb = inject(FormBuilder);
+  private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly translate = inject(TranslateService);
 
   readonly saving = signal(false);
+  readonly loading = signal(false);
   readonly error = signal<string | null>(null);
+  readonly existing = signal<Account | null>(null);
   readonly isAdmin = computed(() => this.auth.user()?.role === 'ADMIN');
+  readonly isEdit = computed(() => this.existing() != null);
   readonly types: AccountType[] = ['BANK', 'WALLET', 'CASH'];
   readonly today = this.isoToday();
 
@@ -150,7 +183,7 @@ export class AccountFormPage implements OnInit {
   });
 
   ngOnInit(): void {
-    void this.ensureHousehold();
+    void this.bootstrap();
   }
 
   typeLabel(type: AccountType): string {
@@ -171,34 +204,63 @@ export class AccountFormPage implements OnInit {
     const raw = this.form.getRawValue();
     this.saving.set(true);
     this.error.set(null);
-    this.api
-      .create({
-        name: raw.name.trim(),
-        type: raw.type,
-        ownerLabel: raw.ownerLabel.trim(),
-        openedOn: raw.openedOn,
-        openingAmount: raw.openingAmount.trim(),
-        sortOrder: raw.sortOrder ?? 0,
-      })
-      .subscribe({
-        next: () => {
-          this.saving.set(false);
-          void this.router.navigateByUrl('/accounts');
-        },
-        error: () => {
-          this.saving.set(false);
-          this.error.set(this.translate.instant('accounts.saveError'));
-        },
-      });
+    const existing = this.existing();
+    const request$ = existing
+      ? this.api.update(existing.id, {
+          name: raw.name.trim(),
+          type: raw.type,
+          ownerLabel: raw.ownerLabel.trim(),
+          sortOrder: raw.sortOrder ?? 0,
+        })
+      : this.api.create({
+          name: raw.name.trim(),
+          type: raw.type,
+          ownerLabel: raw.ownerLabel.trim(),
+          openedOn: raw.openedOn,
+          openingAmount: raw.openingAmount.trim(),
+          sortOrder: raw.sortOrder ?? 0,
+        });
+
+    request$.subscribe({
+      next: () => {
+        this.saving.set(false);
+        void this.router.navigateByUrl('/accounts');
+      },
+      error: () => {
+        this.saving.set(false);
+        this.error.set(this.translate.instant('accounts.saveError'));
+      },
+    });
   }
 
-  private async ensureHousehold(): Promise<void> {
+  private async bootstrap(): Promise<void> {
+    this.loading.set(true);
+    this.error.set(null);
     try {
       if (!this.auth.household()) {
         await firstValueFrom(this.auth.loadHousehold());
       }
+      const accountId = this.route.snapshot.paramMap.get('accountId');
+      if (accountId) {
+        const account = await firstValueFrom(this.api.get(accountId));
+        this.existing.set(account);
+        this.form.patchValue({
+          name: account.name,
+          type: (['BANK', 'WALLET', 'CASH'].includes(account.type)
+            ? account.type
+            : 'CASH') as AccountType,
+          ownerLabel: account.ownerLabel,
+          openedOn: account.openedOn,
+          openingAmount: account.openingAmount,
+          sortOrder: account.sortOrder,
+        });
+        this.form.controls.openedOn.disable({ emitEvent: false });
+        this.form.controls.openingAmount.disable({ emitEvent: false });
+      }
     } catch {
       this.error.set(this.translate.instant('accounts.loadError'));
+    } finally {
+      this.loading.set(false);
     }
   }
 

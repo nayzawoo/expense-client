@@ -27,6 +27,14 @@ export interface CreateAccountRequest {
   sortOrder: number;
 }
 
+/** Metadata-only update; opening amount/date and currency are immutable. */
+export interface UpdateAccountRequest {
+  name: string;
+  type: AccountType;
+  ownerLabel: string;
+  sortOrder: number;
+}
+
 export interface LedgerQuery {
   from?: string;
   to?: string;

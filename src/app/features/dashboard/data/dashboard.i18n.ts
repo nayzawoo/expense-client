@@ -1,5 +1,4 @@
-import { InjectionToken, inject } from '@angular/core';
-import { TranslateService } from '@ngx-translate/core';
+import { provideFeatureI18n } from '../../../core/i18n/feature-i18n';
 
 const EN = {
   dashboard: {
@@ -69,16 +68,6 @@ const MY = {
   },
 };
 
-export const DASHBOARD_I18N = new InjectionToken<boolean>('DASHBOARD_I18N');
-
 export function provideDashboardI18n() {
-  return {
-    provide: DASHBOARD_I18N,
-    useFactory: () => {
-      const translate = inject(TranslateService);
-      translate.setTranslation('en', EN, true);
-      translate.setTranslation('my', MY, true);
-      return true;
-    },
-  };
+  return provideFeatureI18n(EN, MY);
 }

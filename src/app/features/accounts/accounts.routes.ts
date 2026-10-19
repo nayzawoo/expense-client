@@ -18,6 +18,11 @@ export const ACCOUNTS_ROUTES: Routes = [
           import('./pages/account-form.page').then((m) => m.AccountFormPage),
       },
       {
+        path: ':accountId/edit',
+        loadComponent: () =>
+          import('./pages/account-form.page').then((m) => m.AccountFormPage),
+      },
+      {
         path: ':accountId/ledger',
         loadComponent: () =>
           import('./pages/account-ledger.page').then((m) => m.AccountLedgerPage),
