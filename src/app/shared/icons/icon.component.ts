@@ -18,6 +18,8 @@ export type AppIconName =
   | 'transfer'
   | 'tags'
   | 'users'
+  | 'user-cog'
+  | 'key'
   | 'landmark'
   | 'user'
   | 'logout'
@@ -39,6 +41,8 @@ const NAME_MAP: Record<Exclude<AppIconName, 'category'>, string> = {
   transfer: 'arrow-left-right',
   tags: 'tags',
   users: 'users',
+  'user-cog': 'user-cog',
+  key: 'key-round',
   landmark: 'landmark',
   user: 'user',
   logout: 'log-out',

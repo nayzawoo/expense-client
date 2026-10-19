@@ -47,6 +47,10 @@ export const routes: Routes = [
           import('./features/accounts/accounts.routes').then((m) => m.ACCOUNTS_ROUTES),
       },
       {
+        path: 'users',
+        loadChildren: () => import('./features/users/users.routes').then((m) => m.USERS_ROUTES),
+      },
+      {
         path: 'profile',
         loadChildren: () =>
           import('./features/profile/profile.routes').then((m) => m.PROFILE_ROUTES),
