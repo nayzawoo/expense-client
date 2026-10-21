@@ -1,13 +1,25 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, forkJoin } from 'rxjs';
 import { AuthService } from '../../../core';
 import {
+  IconComponent,
   MoneyPipe,
   UiAlertComponent,
   UiBadgeComponent,
+  UiButtonComponent,
+  UiDialogComponent,
   UiSkeletonComponent,
+  UiSpinnerComponent,
 } from '../../../shared';
+import { ExpenseFormComponent } from '../../expenses/components/expense-form.component';
+import { ExpenseApiService } from '../../expenses/data/expense-api.service';
+import type {
+  AccountOption,
+  BeneficiaryOption,
+  CategoryOption,
+  ExpenseDto,
+} from '../../expenses/data/expense.models';
 import { SpendingPaceChartComponent } from '../components/spending-pace-chart';
 import { DashboardApi } from '../data/dashboard.api';
 import { DashboardPayload } from '../data/dashboard.models';
@@ -18,9 +30,14 @@ import { DashboardPayload } from '../data/dashboard.models';
   imports: [
     TranslatePipe,
     MoneyPipe,
+    IconComponent,
     UiAlertComponent,
     UiSkeletonComponent,
     UiBadgeComponent,
+    UiButtonComponent,
+    UiDialogComponent,
+    UiSpinnerComponent,
+    ExpenseFormComponent,
     SpendingPaceChartComponent,
   ],
   template: `
@@ -45,12 +62,20 @@ import { DashboardPayload } from '../data/dashboard.models';
               {{ 'dashboard.asOf' | translate }} {{ d.asOf }} · {{ d.timeZone }}
             </p>
           </div>
-          @if (!d.comparisonPeriod.coverage.complete) {
-            <app-ui-badge
-              severity="warn"
-              [value]="'dashboard.coverageIncomplete' | translate"
-            />
-          }
+          <div class="flex flex-wrap items-center gap-2">
+            @if (!d.comparisonPeriod.coverage.complete) {
+              <app-ui-badge
+                severity="warn"
+                [value]="'dashboard.coverageIncomplete' | translate"
+              />
+            }
+            <app-ui-button type="button" size="sm" (clicked)="openAddExpense()">
+              <span class="inline-flex items-center gap-1.5">
+                <app-icon name="plus" sizeClass="h-4 w-4" [size]="16" />
+                {{ 'dashboard.addExpense' | translate }}
+              </span>
+            </app-ui-button>
+          </div>
         </header>
 
         <section class="rounded-xl border border-surface-200 bg-surface-0 p-4 md:p-5">
@@ -251,16 +276,50 @@ import { DashboardPayload } from '../data/dashboard.models';
         </div>
       }
     </div>
+
+    <app-ui-dialog
+      size="lg"
+      [open]="addExpenseOpen()"
+      [title]="'dashboard.addExpense' | translate"
+      (closed)="closeAddExpense()"
+    >
+      @if (formLoading()) {
+        <div class="flex justify-center py-10"><app-ui-spinner /></div>
+      } @else if (formError()) {
+        <div class="flex flex-col gap-3">
+          <app-ui-alert severity="error">{{ formError() }}</app-ui-alert>
+          <app-ui-button type="button" (clicked)="loadExpenseForm()">
+            {{ 'dashboard.retry' | translate }}
+          </app-ui-button>
+        </div>
+      } @else {
+        <app-expense-form
+          [accounts]="accounts()"
+          [categories]="categories()"
+          [beneficiaries]="beneficiaries()"
+          (saved)="onExpenseSaved($event)"
+          (cancelled)="closeAddExpense()"
+        />
+      }
+    </app-ui-dialog>
   `,
 })
 export class DashboardPage implements OnInit {
   private readonly api = inject(DashboardApi);
+  private readonly expenseApi = inject(ExpenseApiService);
   private readonly auth = inject(AuthService);
   private readonly translate = inject(TranslateService);
 
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
   readonly data = signal<DashboardPayload | null>(null);
+
+  readonly addExpenseOpen = signal(false);
+  readonly formLoading = signal(false);
+  readonly formError = signal<string | null>(null);
+  readonly accounts = signal<AccountOption[]>([]);
+  readonly categories = signal<CategoryOption[]>([]);
+  readonly beneficiaries = signal<BeneficiaryOption[]>([]);
 
   ngOnInit(): void {
     void this.load();
@@ -274,8 +333,46 @@ export class DashboardPage implements OnInit {
     return Math.min(n, 100);
   }
 
-  private async load(): Promise<void> {
-    this.loading.set(true);
+  openAddExpense(): void {
+    this.addExpenseOpen.set(true);
+    void this.loadExpenseForm();
+  }
+
+  closeAddExpense(): void {
+    this.addExpenseOpen.set(false);
+    this.formError.set(null);
+  }
+
+  loadExpenseForm(): void {
+    this.formLoading.set(true);
+    this.formError.set(null);
+    forkJoin({
+      accounts: this.expenseApi.listAccounts(),
+      categories: this.expenseApi.listCategories(),
+      beneficiaries: this.expenseApi.listBeneficiaries(),
+    }).subscribe({
+      next: ({ accounts, categories, beneficiaries }) => {
+        this.accounts.set(accounts);
+        this.categories.set(categories);
+        this.beneficiaries.set(beneficiaries);
+        this.formLoading.set(false);
+      },
+      error: () => {
+        this.formError.set(this.translate.instant('dashboard.formLoadError'));
+        this.formLoading.set(false);
+      },
+    });
+  }
+
+  onExpenseSaved(_expense: ExpenseDto): void {
+    // Stay on dashboard; refresh totals/activity. Form stays open for another entry.
+    void this.load({ quiet: true });
+  }
+
+  private async load(options?: { quiet?: boolean }): Promise<void> {
+    if (!options?.quiet) {
+      this.loading.set(true);
+    }
     this.error.set(null);
     try {
       if (!this.auth.household()) {

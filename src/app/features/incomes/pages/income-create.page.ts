@@ -4,7 +4,12 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { LanguageService } from '../../../core';
-import { UiAlertComponent, UiButtonComponent, UiSpinnerComponent } from '../../../shared';
+import {
+  UiAlertComponent,
+  UiButtonComponent,
+  UiSpinnerComponent,
+  wholeMmkAmountValidator,
+} from '../../../shared';
 import { IncomeApiService } from '../data/income-api.service';
 import { incomeT, type IncomeMessageKey } from '../data/income-i18n';
 import type { AccountOption, BeneficiaryOption } from '../data/income.models';
@@ -42,6 +47,8 @@ import type { AccountOption, BeneficiaryOption } from '../data/income.models';
             <app-ui-alert severity="error">{{ loadError() }}</app-ui-alert>
             <app-ui-button (clicked)="load()">{{ label('retry') }}</app-ui-button>
           </div>
+        } @else if (accountOptions().length === 0 || beneficiaryOptions().length === 0) {
+          <app-ui-alert severity="warn">{{ label('missingRefs') }}</app-ui-alert>
         } @else {
           <form class="flex flex-col gap-4" [formGroup]="form" (ngSubmit)="submit()">
             @if (error()) {
@@ -54,6 +61,9 @@ import type { AccountOption, BeneficiaryOption } from '../data/income.models';
             <label class="flex flex-col gap-1.5 text-sm font-medium">
               {{ label('date') }}
               <input class="ui-input" type="date" formControlName="effectiveDate" [attr.max]="maxDate" />
+              @if (showError('effectiveDate')) {
+                <span class="text-xs text-rose-700">{{ label('required') }}</span>
+              }
             </label>
 
             <label class="flex flex-col gap-1.5 text-sm font-medium">
@@ -65,7 +75,7 @@ import type { AccountOption, BeneficiaryOption } from '../data/income.models';
                 autocomplete="off"
                 placeholder="1000"
               />
-              @if (form.controls.amount.touched && form.controls.amount.invalid) {
+              @if (showError('amount')) {
                 <span class="text-xs text-rose-700">{{ label('invalidAmount') }}</span>
               }
             </label>
@@ -73,19 +83,27 @@ import type { AccountOption, BeneficiaryOption } from '../data/income.models';
             <label class="flex flex-col gap-1.5 text-sm font-medium">
               {{ label('account') }}
               <select class="ui-input" formControlName="accountId">
+                <option value="" disabled>{{ label('account') }}</option>
                 @for (option of accountOptions(); track option.id) {
                   <option [value]="option.id">{{ option.name }}</option>
                 }
               </select>
+              @if (showError('accountId')) {
+                <span class="text-xs text-rose-700">{{ label('required') }}</span>
+              }
             </label>
 
             <label class="flex flex-col gap-1.5 text-sm font-medium">
               {{ label('beneficiary') }}
               <select class="ui-input" formControlName="beneficiaryId">
+                <option value="" disabled>{{ label('beneficiary') }}</option>
                 @for (option of beneficiaryOptions(); track option.id) {
                   <option [value]="option.id">{{ option.name }}</option>
                 }
               </select>
+              @if (showError('beneficiaryId')) {
+                <span class="text-xs text-rose-700">{{ label('required') }}</span>
+              }
             </label>
 
             <label class="flex flex-col gap-1.5 text-sm font-medium">
@@ -94,7 +112,7 @@ import type { AccountOption, BeneficiaryOption } from '../data/income.models';
             </label>
 
             <div class="flex flex-wrap gap-2 pt-2">
-              <app-ui-button type="submit" [loading]="saving()" [disabled]="form.invalid || saving()">
+              <app-ui-button type="submit" [loading]="saving()" [disabled]="saving()">
                 {{ label('save') }}
               </app-ui-button>
               <app-ui-button type="button" variant="secondary" (clicked)="goList()">
@@ -118,13 +136,14 @@ export class IncomeCreatePage implements OnInit {
   readonly saving = signal(false);
   readonly error = signal<string | null>(null);
   readonly success = signal<string | null>(null);
+  readonly submitted = signal(false);
   readonly accounts = signal<AccountOption[]>([]);
   readonly beneficiaries = signal<BeneficiaryOption[]>([]);
   readonly maxDate = this.isoToday();
 
   readonly form = this.fb.nonNullable.group({
     effectiveDate: [this.maxDate, Validators.required],
-    amount: ['', [Validators.required, Validators.pattern(/^\d+$/)]],
+    amount: ['', [Validators.required, wholeMmkAmountValidator()]],
     accountId: ['', Validators.required],
     beneficiaryId: ['', Validators.required],
     note: [''],
@@ -146,6 +165,11 @@ export class IncomeCreatePage implements OnInit {
     return this.beneficiaries().filter((b) => b.status === 'ACTIVE');
   }
 
+  showError(control: 'effectiveDate' | 'amount' | 'accountId' | 'beneficiaryId'): boolean {
+    const c = this.form.controls[control];
+    return c.invalid && (c.touched || this.submitted());
+  }
+
   load(): void {
     this.loading.set(true);
     this.loadError.set(null);
@@ -156,10 +180,9 @@ export class IncomeCreatePage implements OnInit {
       next: ({ accounts, beneficiaries }) => {
         this.accounts.set(accounts);
         this.beneficiaries.set(beneficiaries);
-        const firstAccount = accounts.find((a) => a.status === 'ACTIVE')?.id ?? '';
-        const firstBeneficiary = beneficiaries.find((b) => b.status === 'ACTIVE')?.id ?? '';
-        this.form.patchValue({ accountId: firstAccount, beneficiaryId: firstBeneficiary });
         this.loading.set(false);
+        // Patch after the select options exist in the DOM so the control value sticks.
+        queueMicrotask(() => this.applyDefaultRefs());
       },
       error: () => {
         this.loadError.set(this.label('loadError'));
@@ -171,8 +194,9 @@ export class IncomeCreatePage implements OnInit {
   submit(): void {
     this.error.set(null);
     this.success.set(null);
+    this.submitted.set(true);
+    this.form.markAllAsTouched();
     if (this.form.invalid) {
-      this.form.markAllAsTouched();
       return;
     }
     const raw = this.form.getRawValue();
@@ -189,15 +213,16 @@ export class IncomeCreatePage implements OnInit {
         next: () => {
           this.saving.set(false);
           this.success.set(this.label('createSuccess'));
+          this.submitted.set(false);
           this.form.patchValue({ amount: '', note: '' });
-          this.form.markAsPristine();
-          this.form.markAsUntouched();
+          this.form.controls.amount.markAsPristine();
+          this.form.controls.amount.markAsUntouched();
+          this.form.controls.note.markAsPristine();
+          this.form.controls.note.markAsUntouched();
         },
-        error: (err: { status?: number; error?: { message?: string; detail?: string } }) => {
+        error: (err: unknown) => {
           this.saving.set(false);
-          this.error.set(
-            err.error?.message || err.error?.detail || String(err.status ?? 'Request failed'),
-          );
+          this.error.set(this.describeError(err));
         },
       });
   }
@@ -206,8 +231,36 @@ export class IncomeCreatePage implements OnInit {
     void this.router.navigateByUrl('/incomes');
   }
 
+  private applyDefaultRefs(): void {
+    const firstAccount = this.accountOptions()[0]?.id ?? '';
+    const firstBeneficiary = this.beneficiaryOptions()[0]?.id ?? '';
+    this.form.patchValue({
+      accountId: firstAccount,
+      beneficiaryId: firstBeneficiary,
+    });
+  }
+
   private isoToday(): string {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
+
+  private describeError(err: unknown): string {
+    const e = err as {
+      status?: number;
+      error?: { message?: string; detail?: string; title?: string };
+    };
+    if (e.status === 401) {
+      return 'Unauthorized';
+    }
+    if (e.status === 403) {
+      return 'Forbidden';
+    }
+    return (
+      e.error?.detail ||
+      e.error?.message ||
+      e.error?.title ||
+      String(e.status ?? 'Request failed')
+    );
   }
 }

@@ -2,6 +2,10 @@ export { PagePlaceholderComponent } from './components/page-placeholder/page-pla
 export { LanguageSwitcherComponent } from './components/language-switcher/language-switcher.component';
 export { MoneyPipe } from './pipes/money.pipe';
 export { createIdempotencyKey } from './utils/idempotency-key';
+export {
+  WHOLE_MMK_AMOUNT_PATTERN,
+  wholeMmkAmountValidator,
+} from './utils/whole-mmk-amount';
 export { IconComponent } from './icons/icon.component';
 export { UiButtonComponent } from './ui/ui-button.component';
 export { UiAlertComponent } from './ui/ui-alert.component';
