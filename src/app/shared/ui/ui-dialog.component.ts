@@ -13,14 +13,17 @@ import {
   template: `
     <dialog
       #dialogEl
-      class="w-[min(100%,28rem)] rounded-xl border border-slate-200 bg-white p-0 text-slate-900 shadow-xl backdrop:bg-slate-900/40"
+      [class]="
+        (size() === 'lg' ? 'w-[min(100%,32rem)] ' : 'w-[min(100%,28rem)] ') +
+        'rounded-xl border border-slate-200 bg-white p-0 text-slate-900 shadow-xl backdrop:bg-slate-900/40'
+      "
       (close)="closed.emit()"
       (click)="onBackdrop($event)"
     >
       <div class="border-b border-slate-200 px-4 py-3">
         <h2 class="text-base font-semibold">{{ title() }}</h2>
       </div>
-      <div class="px-4 py-4" (click)="$event.stopPropagation()">
+      <div class="max-h-[min(80dvh,40rem)] overflow-y-auto px-4 py-4" (click)="$event.stopPropagation()">
         <ng-content />
       </div>
     </dialog>
@@ -29,6 +32,8 @@ import {
 export class UiDialogComponent {
   readonly open = input(false);
   readonly title = input('');
+  /** md = 28rem (default); lg = 32rem for taller forms. */
+  readonly size = input<'md' | 'lg'>('md');
   readonly closed = output<void>();
 
   private readonly dialogRef = viewChild<ElementRef<HTMLDialogElement>>('dialogEl');

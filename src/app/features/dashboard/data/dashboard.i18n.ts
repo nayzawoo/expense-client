@@ -31,6 +31,9 @@ const EN = {
     byPerson: 'Spending by person',
     noPeople: 'No beneficiary spending yet.',
     coverageIncomplete: 'Comparison coverage is incomplete for this period.',
+    addExpense: 'Add expense',
+    formLoadError: 'Could not load the expense form.',
+    retry: 'Retry',
   },
 };
 
@@ -65,6 +68,9 @@ const MY = {
     byPerson: 'လူအလိုက် အသုံးစရိတ်',
     noPeople: 'beneficiary အသုံးစရိတ် မရှိသေးပါ။',
     coverageIncomplete: 'ဤကာလအတွက် နှိုင်းယှဉ် ဒေတာ မပြည့်စုံပါ။',
+    addExpense: 'ထွက်ငွေ ထည့်ရန်',
+    formLoadError: 'ထွက်ငွေ ဖောင် တင်မရပါ။',
+    retry: 'ပြန်ကြိုးစား',
   },
 };
 

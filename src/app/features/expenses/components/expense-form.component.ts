@@ -13,6 +13,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { LanguageService } from '../../../core';
 import { UiAlertComponent } from '../../../shared/ui/ui-alert.component';
 import { UiButtonComponent } from '../../../shared/ui/ui-button.component';
+import { wholeMmkAmountValidator } from '../../../shared/utils/whole-mmk-amount';
 import { ExpenseApiService } from '../data/expense-api.service';
 import { expenseT, type ExpenseMessageKey } from '../data/expense-i18n';
 import type {
@@ -40,6 +41,9 @@ import type {
       <label class="flex flex-col gap-1.5 text-sm font-medium">
         {{ label('date') }}
         <input class="ui-input" type="date" formControlName="effectiveDate" [attr.max]="maxDate" />
+        @if (showError('effectiveDate')) {
+          <span class="text-xs text-red-600">{{ label('required') }}</span>
+        }
       </label>
 
       <label class="flex flex-col gap-1.5 text-sm font-medium">
@@ -51,7 +55,7 @@ import type {
           autocomplete="off"
           placeholder="1000"
         />
-        @if (form.controls.amount.touched && form.controls.amount.invalid) {
+        @if (showError('amount')) {
           <span class="text-xs text-red-600">{{ label('invalidAmount') }}</span>
         }
       </label>
@@ -59,10 +63,14 @@ import type {
       <label class="flex flex-col gap-1.5 text-sm font-medium">
         {{ label('account') }}
         <select class="ui-input" formControlName="accountId">
+          <option value="" disabled>{{ label('account') }}</option>
           @for (option of accountOptions; track option.id) {
             <option [value]="option.id">{{ option.name }}</option>
           }
         </select>
+        @if (showError('accountId')) {
+          <span class="text-xs text-red-600">{{ label('required') }}</span>
+        }
       </label>
 
       <label class="flex flex-col gap-1.5 text-sm font-medium">
@@ -73,15 +81,22 @@ import type {
             <option [value]="option.id">{{ option.name }}</option>
           }
         </select>
+        @if (showError('categoryId')) {
+          <span class="text-xs text-red-600">{{ label('required') }}</span>
+        }
       </label>
 
       <label class="flex flex-col gap-1.5 text-sm font-medium">
         {{ label('beneficiary') }}
         <select class="ui-input" formControlName="beneficiaryId">
+          <option value="" disabled>{{ label('beneficiary') }}</option>
           @for (option of beneficiaryOptions; track option.id) {
             <option [value]="option.id">{{ option.name }}</option>
           }
         </select>
+        @if (showError('beneficiaryId')) {
+          <span class="text-xs text-red-600">{{ label('required') }}</span>
+        }
       </label>
 
       <label class="flex flex-col gap-1.5 text-sm font-medium">
@@ -93,11 +108,14 @@ import type {
         <label class="flex flex-col gap-1.5 text-sm font-medium">
           {{ label('changeReason') }}
           <input class="ui-input" formControlName="changeReason" />
+          @if (showError('changeReason')) {
+            <span class="text-xs text-red-600">{{ label('required') }}</span>
+          }
         </label>
       }
 
       <div class="flex flex-wrap gap-2 pt-2">
-        <app-ui-button type="submit" [loading]="saving()" [disabled]="form.invalid || saving()">
+        <app-ui-button type="submit" [loading]="saving()" [disabled]="saving()">
           {{ label('save') }}
         </app-ui-button>
         <app-ui-button type="button" variant="secondary" (clicked)="cancelled.emit()">
@@ -124,10 +142,11 @@ export class ExpenseFormComponent implements OnChanges {
   readonly saving = signal(false);
   readonly error = signal<string | null>(null);
   readonly success = signal<string | null>(null);
+  readonly submitted = signal(false);
 
   readonly form = this.fb.nonNullable.group({
     effectiveDate: [this.toIsoDate(new Date())!, Validators.required],
-    amount: ['', [Validators.required, Validators.pattern(/^\d+$/)]],
+    amount: ['', [Validators.required, wholeMmkAmountValidator()]],
     accountId: ['', Validators.required],
     categoryId: ['', Validators.required],
     beneficiaryId: ['', Validators.required],
@@ -166,11 +185,25 @@ export class ExpenseFormComponent implements OnChanges {
     return expenseT(this.language.current(), key);
   }
 
+  showError(
+    control:
+      | 'effectiveDate'
+      | 'amount'
+      | 'accountId'
+      | 'categoryId'
+      | 'beneficiaryId'
+      | 'changeReason',
+  ): boolean {
+    const c = this.form.controls[control];
+    return c.invalid && (c.touched || this.submitted());
+  }
+
   submit(): void {
     this.error.set(null);
     this.success.set(null);
+    this.submitted.set(true);
+    this.form.markAllAsTouched();
     if (this.form.invalid) {
-      this.form.markAllAsTouched();
       return;
     }
     const raw = this.form.getRawValue();
@@ -201,13 +234,16 @@ export class ExpenseFormComponent implements OnChanges {
         this.saving.set(false);
         this.success.set(this.label(this.initial ? 'updateSuccess' : 'createSuccess'));
         if (!this.initial) {
+          this.submitted.set(false);
           this.form.patchValue({ amount: '', note: '' });
-          this.form.markAsPristine();
-          this.form.markAsUntouched();
+          this.form.controls.amount.markAsPristine();
+          this.form.controls.amount.markAsUntouched();
+          this.form.controls.note.markAsPristine();
+          this.form.controls.note.markAsUntouched();
         }
         this.saved.emit(expense);
       },
-      error: (err: { status?: number; error?: { message?: string; detail?: string } }) => {
+      error: (err: { status?: number; error?: { message?: string; detail?: string; title?: string } }) => {
         this.saving.set(false);
         this.error.set(this.describeError(err));
       },
@@ -241,6 +277,16 @@ export class ExpenseFormComponent implements OnChanges {
       this.form.controls.changeReason.clearValidators();
     }
     this.form.controls.changeReason.updateValueAndValidity({ emitEvent: false });
+    // Re-apply refs after options paint so <select> keeps the FormControl value.
+    queueMicrotask(() => {
+      if (this.initial) {
+        return;
+      }
+      this.form.patchValue({
+        accountId: this.accountOptions[0]?.id ?? '',
+        beneficiaryId: this.beneficiaryOptions[0]?.id ?? '',
+      });
+    });
   }
 
   private toIsoDate(value: Date): string | null {
@@ -255,7 +301,7 @@ export class ExpenseFormComponent implements OnChanges {
 
   private describeError(err: {
     status?: number;
-    error?: { message?: string; detail?: string };
+    error?: { message?: string; detail?: string; title?: string };
   }): string {
     if (err.status === 401) {
       return 'Unauthorized';
@@ -263,6 +309,11 @@ export class ExpenseFormComponent implements OnChanges {
     if (err.status === 403) {
       return 'Forbidden';
     }
-    return err.error?.message || err.error?.detail || String(err.status ?? 'Request failed');
+    return (
+      err.error?.detail ||
+      err.error?.message ||
+      err.error?.title ||
+      String(err.status ?? 'Request failed')
+    );
   }
 }
