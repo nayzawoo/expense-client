@@ -5,6 +5,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../../core';
 import { IconComponent } from '../../../shared/icons/icon.component';
+import { CATEGORY_ICON_KEY_LIST } from '../../../shared/icons/lucide-icons';
 import { UiAlertComponent } from '../../../shared/ui/ui-alert.component';
 import { UiButtonComponent } from '../../../shared/ui/ui-button.component';
 import { UiSkeletonComponent } from '../../../shared/ui/ui-skeleton.component';
@@ -100,27 +101,38 @@ import { Category } from '../data/category.models';
           </div>
 
           <div class="flex flex-col gap-1.5">
-            <label for="category-icon" class="text-sm font-medium text-surface-800">
+            <span id="category-icon-label" class="text-sm font-medium text-surface-800">
               {{ 'categories.icon' | translate }}
-            </label>
-            <div class="flex items-center gap-3">
-              <select id="category-icon" class="ui-input" formControlName="iconKey">
-                @for (key of iconKeys; track key) {
-                  <option [value]="key">{{ key }}</option>
-                }
-              </select>
-              <span
-                class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-surface-200"
-                [style.color]="form.controls.color.value"
-                [style.background]="form.controls.color.value + '22'"
-              >
-                <app-icon
-                  name="category"
-                  [categoryKey]="form.controls.iconKey.value"
-                  sizeClass="h-5 w-5"
-                  [size]="20"
-                />
-              </span>
+            </span>
+            <div
+              class="grid grid-cols-5 gap-2 sm:grid-cols-6"
+              role="listbox"
+              aria-labelledby="category-icon-label"
+            >
+              @for (key of iconKeys; track key) {
+                <button
+                  type="button"
+                  role="option"
+                  class="flex flex-col items-center gap-1 rounded-lg border px-1 py-2 text-center transition-colors"
+                  [class.border-primary-500]="form.controls.iconKey.value === key"
+                  [class.bg-surface-50]="form.controls.iconKey.value === key"
+                  [class.text-primary-600]="form.controls.iconKey.value === key"
+                  [class.border-surface-200]="form.controls.iconKey.value !== key"
+                  [class.text-surface-700]="form.controls.iconKey.value !== key"
+                  [attr.aria-selected]="form.controls.iconKey.value === key"
+                  [attr.title]="key"
+                  (click)="selectIcon(key)"
+                >
+                  <span
+                    class="flex h-8 w-8 items-center justify-center rounded-md"
+                    [style.color]="form.controls.color.value"
+                    [style.background]="form.controls.color.value + '22'"
+                  >
+                    <app-icon name="category" [categoryKey]="key" sizeClass="h-4 w-4" [size]="16" />
+                  </span>
+                  <span class="w-full truncate text-[10px] leading-tight">{{ key }}</span>
+                </button>
+              }
             </div>
             <p class="text-[10px] text-surface-500">{{ 'categories.iconHint' | translate }}</p>
           </div>
@@ -151,17 +163,7 @@ export class CategoryFormPage implements OnInit {
   readonly categoryId = signal<string | null>(null);
   readonly isEdit = computed(() => this.categoryId() !== null);
   readonly isAdmin = computed(() => this.auth.user()?.role === 'ADMIN');
-  readonly iconKeys = [
-    'food',
-    'transport',
-    'home',
-    'health',
-    'shopping',
-    'bills',
-    'education',
-    'entertainment',
-    'other',
-  ] as const;
+  readonly iconKeys = CATEGORY_ICON_KEY_LIST;
 
   readonly form = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.maxLength(120)]],
@@ -173,6 +175,11 @@ export class CategoryFormPage implements OnInit {
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
     void this.bootstrap(id);
+  }
+
+  selectIcon(key: string): void {
+    this.form.controls.iconKey.setValue(key);
+    this.form.controls.iconKey.markAsDirty();
   }
 
   private async bootstrap(id: string | null): Promise<void> {
